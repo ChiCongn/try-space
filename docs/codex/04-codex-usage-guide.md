@@ -6,10 +6,11 @@ Tài liệu này hướng dẫn cách dùng Codex hằng ngày để xây TrySpa
 
 1. Chọn phase trong roadmap.
 2. Đọc cấu trúc chuẩn trong `docs/codex/00-project-structure.md`.
-3. Copy prompt tương ứng từ `docs/codex/03-codex-prompts.md`.
-4. Dán vào Codex.
-5. Để Codex đọc code, tạo branch, implement, test, add, commit.
-6. Kiểm tra final summary của Codex:
+3. Nếu làm theo phase, copy prompt tương ứng từ `docs/codex/03-codex-prompts.md`.
+4. Nếu giao việc theo vai trò, copy agent prompt từ `docs/codex/05-agent-prompts.md`.
+5. Dán vào Codex và điền task cụ thể.
+6. Để Codex đọc code, tạo branch, implement, test, add, commit.
+7. Kiểm tra final summary của Codex:
    - File nào đã đổi.
    - Test nào đã chạy.
    - Commit hash/message.
@@ -44,6 +45,18 @@ git log --oneline --decorate --graph --all -20
 ```
 
 ## Cách Yêu Cầu Codex Làm Một Feature
+
+Với TrySpace, ưu tiên thứ tự AR trước:
+
+```text
+feat/frontend-foundation
+feat/ar-vertical-slice
+feat/ar-product-experience
+feat/product-catalog
+feat/cart-flow
+feat/mock-auth-designs
+feat/pwa-demo-polish
+```
 
 Mẫu ngắn:
 
@@ -96,6 +109,24 @@ Nếu có lỗi nhỏ, tự sửa và commit.
 Nếu pass, merge --no-ff vào dev.
 ```
 
+## Cách Dùng Agent Prompts
+
+1. Mở `docs/codex/05-agent-prompts.md`.
+2. Chọn agent đúng với task, ví dụ AR Implementation Agent cho `model-viewer`.
+3. Copy toàn bộ prompt agent.
+4. Thay `<mô tả task ...>` bằng yêu cầu cụ thể.
+5. Nếu task có thể chạm nhiều ownership, ghi rõ file được phép sửa và file không được sửa.
+6. Sau khi agent commit, dùng QA Review Agent trước khi merge vào `dev`.
+
+Ví dụ task AR:
+
+```text
+Task:
+Triển khai ModelViewer.tsx với @google/model-viewer, loading/error states,
+poster, ar-modes webxr scene-viewer quick-look, và tích hợp vào ArDemoPage.
+Không sửa cart/auth/designs.
+```
+
 ## Khi Nào Merge Vào Main
 
 Chỉ merge `dev` vào `main` khi:
@@ -123,6 +154,7 @@ git tag v0.1.0
 - Nói rõ file/module được phép sửa.
 - Nhắc Codex tuân thủ `docs/codex/00-project-structure.md`.
 - Nhắc rõ đây là frontend-only nếu task có thể bị hiểu thành backend.
+- Nhắc rõ "ưu tiên AR" nếu task có thể bị mở rộng sang catalog/cart.
 - Nói rõ những thứ không nằm trong scope.
 - Yêu cầu Codex chạy lệnh kiểm tra cụ thể.
 - Yêu cầu Codex commit cuối task.
