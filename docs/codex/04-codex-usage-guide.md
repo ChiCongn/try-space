@@ -1,14 +1,15 @@
 # Codex Usage Guide For TrySpace
 
-Tài liệu này hướng dẫn cách dùng Codex hằng ngày để xây TrySpace có kiểm soát, có commit rõ ràng, và không làm `main` mất ổn định.
+Tài liệu này hướng dẫn cách dùng Codex hằng ngày để xây TrySpace frontend có kiểm soát, có commit rõ ràng, và không làm `main` mất ổn định.
 
 ## Một Phiên Làm Việc Chuẩn
 
 1. Chọn phase trong roadmap.
-2. Copy prompt tương ứng từ `docs/codex/03-codex-prompts.md`.
-3. Dán vào Codex.
-4. Để Codex đọc code, tạo branch, implement, test, add, commit.
-5. Kiểm tra final summary của Codex:
+2. Đọc cấu trúc chuẩn trong `docs/codex/00-project-structure.md`.
+3. Copy prompt tương ứng từ `docs/codex/03-codex-prompts.md`.
+4. Dán vào Codex.
+5. Để Codex đọc code, tạo branch, implement, test, add, commit.
+6. Kiểm tra final summary của Codex:
    - File nào đã đổi.
    - Test nào đã chạy.
    - Commit hash/message.
@@ -26,13 +27,7 @@ git status --short --branch
 Chạy app web:
 
 ```bash
-npm run dev:web
-```
-
-Chạy API:
-
-```bash
-npm run dev:api
+npm run dev
 ```
 
 Chạy kiểm tra:
@@ -126,11 +121,13 @@ git tag v0.1.0
 
 - Nói rõ branch name.
 - Nói rõ file/module được phép sửa.
+- Nhắc Codex tuân thủ `docs/codex/00-project-structure.md`.
+- Nhắc rõ đây là frontend-only nếu task có thể bị hiểu thành backend.
 - Nói rõ những thứ không nằm trong scope.
 - Yêu cầu Codex chạy lệnh kiểm tra cụ thể.
 - Yêu cầu Codex commit cuối task.
 - Với UI, yêu cầu responsive và trạng thái loading/error/empty.
-- Với API, yêu cầu status code, validation, auth, error handler.
+- Với mock data/localStorage, yêu cầu state không mất sau reload và có empty/error states.
 - Với AR, yêu cầu fallback khi browser không hỗ trợ.
 
 ## Anti-Patterns Cần Tránh
@@ -138,9 +135,10 @@ git tag v0.1.0
 - "Làm hết app" trong một prompt duy nhất.
 - Commit trực tiếp trên `main`.
 - Merge feature vào `dev` khi build đang fail.
+- Tạo `apps/`, `apps/api`, `packages/shared`, Prisma hoặc Express khi task chỉ yêu cầu frontend.
 - Cài dependency không cần thiết.
 - Viết logic AR/WebXR phức tạp trước khi thử `@google/model-viewer`.
-- Trộn frontend, backend, refactor cấu trúc và polish UI trong cùng một branch lớn.
+- Trộn refactor cấu trúc, feature lớn và polish UI trong cùng một branch.
 
 ## Checklist Sau Mỗi Commit
 
@@ -151,4 +149,3 @@ git tag v0.1.0
 [ ] Test/lint/build đã chạy hoặc có lý do rõ ràng nếu chưa chạy
 [ ] Ghi chú follow-up nếu có phần deferred
 ```
-
