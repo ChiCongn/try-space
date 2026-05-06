@@ -1,5 +1,11 @@
 import "@google/model-viewer";
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 type MaterialModel = {
   materials?: Array<{
@@ -11,11 +17,19 @@ type MaterialModel = {
 
 type ModelViewerDomElement = HTMLElement & {
   activateAR?: () => Promise<void>;
+  canActivateAR?: boolean;
   model?: MaterialModel;
   dismissPoster?: () => void;
 };
 
+export type ModelViewerArStatus =
+  | "failed"
+  | "not-presenting"
+  | "object-placed"
+  | "session-started";
+
 export type ModelViewerHandle = {
+  canStartAR: () => boolean;
   startAR: () => Promise<boolean>;
 };
 
@@ -23,6 +37,8 @@ type ModelViewerProps = {
   src: string;
   poster: string;
   alt: string;
+  onArAvailabilityChange?: (canActivateAR: boolean) => void;
+  onArStatusChange?: (status: ModelViewerArStatus) => void;
   selectedColor: string;
 };
 
@@ -36,71 +52,115 @@ function hexToRgba(hexColor: string): [number, number, number, number] {
 }
 
 export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
-  function ModelViewer({ src, poster, alt, selectedColor }, ref) {
-  const viewerRef = useRef<ModelViewerDomElement | null>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">(
-    "loading",
-  );
+  function ModelViewer(
+    {
+      src,
+      poster,
+      alt,
+      onArAvailabilityChange,
+      onArStatusChange,
+      selectedColor,
+    },
+    ref,
+  ) {
+    const viewerRef = useRef<ModelViewerDomElement | null>(null);
+    const [status, setStatus] = useState<"loading" | "ready" | "error">(
+      "loading",
+    );
 
-  useImperativeHandle(ref, () => ({
-    async startAR() {
-      if (!viewerRef.current?.activateAR) {
-        return false;
+    useImperativeHandle(ref, () => ({
+      canStartAR() {
+        return Boolean(
+          viewerRef.current?.activateAR && viewerRef.current.canActivateAR,
+        );
+      },
+      async startAR() {
+        if (!viewerRef.current?.activateAR || !viewerRef.current.canActivateAR) {
+          return false;
+        }
+
+        await viewerRef.current.activateAR();
+        return true;
+      },
+    }));
+
+    useEffect(() => {
+      const viewer = viewerRef.current;
+
+      if (!viewer) {
+        return undefined;
       }
 
-      await viewerRef.current.activateAR();
-      return true;
-    },
-  }));
+      function syncAvailability() {
+        onArAvailabilityChange?.(Boolean(viewer?.canActivateAR));
+      }
 
-  useEffect(() => {
-    const viewer = viewerRef.current;
+      function handleArStatus(event: Event) {
+        const statusDetail = (event as CustomEvent<{ status: ModelViewerArStatus }>)
+          .detail.status;
+        onArStatusChange?.(statusDetail);
+        syncAvailability();
+      }
 
-    if (!viewer?.model?.materials?.length) {
-      return;
-    }
+      viewer.addEventListener("ar-status", handleArStatus);
+      viewer.addEventListener("load", syncAvailability);
+      window.setTimeout(syncAvailability, 0);
 
-    const [firstMaterial] = viewer.model.materials;
-    firstMaterial.pbrMetallicRoughness?.setBaseColorFactor?.(
-      hexToRgba(selectedColor),
+      return () => {
+        viewer.removeEventListener("ar-status", handleArStatus);
+        viewer.removeEventListener("load", syncAvailability);
+      };
+    }, [onArAvailabilityChange, onArStatusChange]);
+
+    useEffect(() => {
+      const viewer = viewerRef.current;
+
+      if (!viewer?.model?.materials?.length) {
+        return;
+      }
+
+      const [firstMaterial] = viewer.model.materials;
+      firstMaterial.pbrMetallicRoughness?.setBaseColorFactor?.(
+        hexToRgba(selectedColor),
+      );
+    }, [selectedColor, status]);
+
+    return (
+      <div className="model-viewer-frame" data-status={status}>
+        <model-viewer
+          ref={viewerRef}
+          src={src}
+          poster={poster}
+          alt={alt}
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          camera-controls
+          auto-rotate
+          shadow-intensity="0.85"
+          exposure="0.9"
+          environment-image="neutral"
+          interaction-prompt="auto"
+          touch-action="pan-y"
+          camera-orbit="-35deg 68deg 2.6m"
+          field-of-view="32deg"
+          loading="eager"
+          reveal="auto"
+          onLoad={() => setStatus("ready")}
+          onError={() => setStatus("error")}
+        />
+
+        {status === "loading" ? (
+          <div className="viewer-state" role="status">
+            Đang tải model 3D
+          </div>
+        ) : null}
+
+        {status === "error" ? (
+          <div className="viewer-state viewer-state-error" role="alert">
+            Không tải được model. Kiểm tra kết nối mạng hoặc thử lại sau.
+          </div>
+        ) : null}
+      </div>
     );
-  }, [selectedColor, status]);
-
-  return (
-    <div className="model-viewer-frame" data-status={status}>
-      <model-viewer
-        ref={viewerRef}
-        src={src}
-        poster={poster}
-        alt={alt}
-        ar
-        ar-modes="webxr scene-viewer quick-look"
-        camera-controls
-        auto-rotate
-        shadow-intensity="0.85"
-        exposure="0.9"
-        environment-image="neutral"
-        interaction-prompt="auto"
-        touch-action="pan-y"
-        camera-orbit="-35deg 68deg 2.6m"
-        field-of-view="32deg"
-        loading="eager"
-        reveal="auto"
-        onLoad={() => setStatus("ready")}
-        onError={() => setStatus("error")}
-      />
-
-      {status === "loading" ? (
-        <div className="viewer-state" role="status">
-          Đang tải model 3D
-        </div>
-      ) : null}
-
-      {status === "error" ? (
-        <div className="viewer-state viewer-state-error" role="alert">
-          Không tải được model. Kiểm tra kết nối mạng hoặc thử lại sau.
-        </div>
-      ) : null}
-    </div>
-  );
-});
+  },
+);

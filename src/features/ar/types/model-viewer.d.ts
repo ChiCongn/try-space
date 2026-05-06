@@ -19,6 +19,8 @@ type ModelViewerElementAttributes = DetailedHTMLProps<
   "camera-orbit"?: string;
   "field-of-view"?: string;
   loading?: "auto" | "lazy" | "eager";
+  onLoad?: () => void;
+  onError?: () => void;
   reveal?: "auto" | "interaction" | "manual";
 };
 
