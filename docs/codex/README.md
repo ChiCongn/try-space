@@ -9,28 +9,31 @@ Bộ tài liệu này biến bản BA `docs/TrySpace_BA_Document.md` thành kế
 
 ## Thứ Tự Sử Dụng
 
-1. Đọc [01-implementation-roadmap.md](./01-implementation-roadmap.md) để biết app sẽ được chia phase nào, mỗi phase tạo file gì.
-2. Dùng [02-git-workflow.md](./02-git-workflow.md) làm quy trình bắt buộc cho branch, commit, merge.
-3. Copy prompt từ [03-codex-prompts.md](./03-codex-prompts.md) cho từng task cụ thể.
-4. Làm theo [04-codex-usage-guide.md](./04-codex-usage-guide.md) khi bắt đầu một phiên Codex mới.
+1. Đọc [00-project-structure.md](./00-project-structure.md) để nắm cấu trúc repo chuẩn.
+2. Đọc [01-implementation-roadmap.md](./01-implementation-roadmap.md) để biết app sẽ được chia phase nào, mỗi phase tạo file gì.
+3. Dùng [02-git-workflow.md](./02-git-workflow.md) làm quy trình bắt buộc cho branch, commit, merge.
+4. Copy prompt từ [03-codex-prompts.md](./03-codex-prompts.md) cho từng task cụ thể.
+5. Làm theo [04-codex-usage-guide.md](./04-codex-usage-guide.md) khi bắt đầu một phiên Codex mới.
 
 ## Quy Ước Triển Khai
 
-Repo hiện tại là Vite React ở root. Kế hoạch đề xuất chuyển sang cấu trúc full-stack có kiểm soát:
+Repo hiện tại là Vite React ở root. Cấu trúc nên dùng cho TrySpace giai đoạn này là **frontend-only React/Vite app ở root**:
 
 ```text
 tryspace-codex/
-├── apps/
-│   ├── web/        # React + Vite + TypeScript + Tailwind
-│   └── api/        # Express + Prisma + PostgreSQL
-├── packages/
-│   └── shared/     # Type, schema, contract dùng chung
+├── public/         # static assets, models, posters, PWA icons
+├── src/
+│   ├── app/        # app shell, routes, providers
+│   ├── components/ # shared layout + UI primitives
+│   ├── features/   # products, ar, cart, auth, designs
+│   ├── shared/     # hooks, lib, mocks, shared frontend types
+│   └── styles/
 ├── docs/
 │   └── codex/      # Bộ kế hoạch/prompt này
-└── docker-compose.yml
+└── package.json
 ```
 
-Nếu deadline ngắn, có thể giữ frontend ở root và chỉ thêm `api/`. Tuy nhiên roadmap chính dùng monorepo `apps/web`, `apps/api`, `packages/shared` vì khớp BA và dễ mở rộng.
+Chi tiết folder-level nằm ở [00-project-structure.md](./00-project-structure.md). Không tạo backend/monorepo trong phạm vi này; các phần auth, cart, save/share dùng mock/localStorage để phục vụ demo frontend.
 
 ## Definition Of Done Chung
 
@@ -41,4 +44,3 @@ Một task chỉ được coi là xong khi:
 - Có test hoặc checklist thủ công cho UI/AR nếu chưa tự động hóa được.
 - `git status --short` chỉ còn sạch sau commit.
 - Commit message dùng Conventional Commits, ví dụ `docs: add codex implementation plan`.
-

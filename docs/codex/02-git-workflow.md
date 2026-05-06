@@ -50,6 +50,8 @@ git add docs/<files>
 git commit -m "docs: add <topic>"
 ```
 
+Nếu tài liệu mới nằm trong folder đang bị `.gitignore` ignore, dùng `git add -f docs/<files>` cho đúng file cần commit.
+
 ## Merge Feature Into Dev
 
 Chỉ merge khi feature branch đã test pass.
@@ -95,7 +97,7 @@ Dùng Conventional Commits:
 feat: add product catalog filters
 fix: handle empty cart totals
 docs: add codex implementation prompts
-chore: configure npm workspaces
+chore: organize frontend structure
 test: add cart store tests
 refactor: split product detail components
 ```
@@ -120,10 +122,9 @@ Một commit nên có một mục đích rõ. Không trộn refactor lớn với
 [ ] npm run lint pass hoặc ghi rõ lý do không chạy được
 [ ] npm run build pass hoặc ghi rõ lý do không chạy được
 [ ] UI đã kiểm tra responsive nếu có thay đổi frontend
-[ ] API đã kiểm tra status code nếu có backend
+[ ] Mock/localStorage flow đã kiểm tra nếu có state persistence
 [ ] git diff --check pass
 [ ] git add đúng file
 [ ] git commit với message chuẩn
 [ ] merge --no-ff vào dev sau khi test pass
 ```
-

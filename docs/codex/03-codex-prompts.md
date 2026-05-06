@@ -5,9 +5,10 @@ Copy từng prompt theo đúng phase. Mỗi prompt đã bao gồm yêu cầu Git
 ## Prompt Khởi Động Phiên Làm Việc
 
 ```text
-Bạn là Codex trong repo TrySpace. Hãy đọc:
+Bạn là Codex trong repo TrySpace frontend-only. Hãy đọc:
 - docs/TrySpace_BA_Document.md
 - docs/codex/README.md
+- docs/codex/00-project-structure.md
 - docs/codex/01-implementation-roadmap.md
 - docs/codex/02-git-workflow.md
 
@@ -16,6 +17,7 @@ Yêu cầu làm việc:
 - Luôn giữ main stable, phát triển từ dev.
 - Tạo nhánh feat/<tên-task> từ dev.
 - Implement đúng scope task, không refactor ngoài phạm vi.
+- Giữ cấu trúc React/Vite root chuẩn, không tạo monorepo, backend, Prisma hoặc Express.
 - Chạy lint/build/test phù hợp.
 - git add và git commit sau khi hoàn tất.
 - Nếu test không chạy được, ghi rõ nguyên nhân và vẫn commit khi thay đổi hợp lệ.
@@ -23,38 +25,36 @@ Yêu cầu làm việc:
 Task hiện tại: <mô tả task>.
 ```
 
-## Phase 0 - Foundation Prompt
+## Phase 0 - Frontend Foundation Prompt
 
 ```text
-Hãy triển khai Phase 0 Project Foundation cho TrySpace.
+Hãy triển khai Phase 0 Frontend Foundation cho TrySpace.
 
-Branch: feat/project-foundation, tạo từ dev.
+Branch: feat/frontend-foundation, tạo từ dev.
 
 Mục tiêu:
-- Chuyển repo từ Vite root hiện tại sang npm workspaces:
-  - apps/web cho React + Vite hiện có.
-  - apps/api cho Express TypeScript API có health endpoint.
-  - packages/shared cho type/schema dùng chung.
-- Cập nhật package scripts root:
-  - dev:web
-  - dev:api
-  - build
-  - lint
-- Thêm tsconfig.base.json nếu cần.
-- Cập nhật README.md hướng dẫn chạy local.
-- Thêm docker-compose.yml cho PostgreSQL local.
-- Không implement nghiệp vụ sản phẩm/auth ở phase này.
+- Giữ app Vite ở root repo, không tạo apps/ hoặc packages/.
+- Chuyển UI template Vite thành cấu trúc React frontend chuẩn:
+  - src/app
+  - src/components/layout
+  - src/components/ui
+  - src/features
+  - src/shared
+  - src/styles
+- Tạo AppShell cơ bản và route/view switching nhẹ nếu cần.
+- Cập nhật main.tsx để dùng src/app/App.tsx và src/styles/index.css.
+- Cập nhật README.md hướng dẫn chạy frontend.
+- Không implement product catalog đầy đủ ở phase này.
+- Không thêm backend/API/Prisma.
 
 Kiểm tra:
-- npm install nếu dependency thay đổi.
 - npm run lint
 - npm run build
-- Nếu có API, chạy kiểm tra health endpoint bằng cách khởi động server nếu phù hợp.
 
 Sau cùng:
 - git status --short
 - git add các file đã tạo/chỉnh
-- git commit -m "chore: set up tryspace monorepo foundation"
+- git commit -m "chore: set up frontend structure"
 ```
 
 ## Phase 1 - Product Catalog Prompt
@@ -66,10 +66,10 @@ Branch: feat/product-catalog, tạo từ dev mới nhất.
 
 Nguồn yêu cầu:
 - BA sections 6, 7, 8.2, 14.
+- docs/codex/00-project-structure.md
 - docs/codex/01-implementation-roadmap.md Phase 1.
 
 Mục tiêu:
-- Thay UI template Vite bằng app TrySpace thực tế.
 - Tạo catalog sản phẩm nội thất mẫu cho ghế, bàn, kệ sách.
 - Có search, filter category/price/color/material, sort.
 - Có product detail page với dimensions, price, variants, CTA "Thử trong phòng" và "Thêm vào giỏ".
@@ -77,14 +77,15 @@ Mục tiêu:
 
 Yêu cầu kỹ thuật:
 - Dùng TypeScript strict-friendly.
-- Tách components theo product/layout/pages.
-- Không gọi API thật ở phase này; dùng data local có shape gần API.
+- Đặt code products trong src/features/products.
+- Đặt UI primitive dùng chung trong src/components/ui.
+- Không gọi API thật; dùng static data/mock trong frontend.
 - UI không dùng landing page marketing làm màn hình chính; vào thẳng trải nghiệm catalog/product.
 
 Kiểm tra:
 - npm run lint
 - npm run build
-- Test thủ công search/filter/empty state.
+- Test thủ công search/filter/empty state/product detail.
 
 Commit:
 - git add .
@@ -105,8 +106,7 @@ Mục tiêu:
 - Tích hợp vào product detail.
 - Tạo VariantSelector cho đổi màu/vật liệu; nếu model không hỗ trợ đổi material runtime thì lưu state variant và phản ánh UI/giá trước.
 - Có fallback message khi AR không khả dụng.
-
-Files tham khảo roadmap Phase 2.
+- Đặt AR code trong src/features/ar và VariantSelector trong src/features/products.
 
 Kiểm tra:
 - npm run lint
@@ -127,7 +127,7 @@ Hãy triển khai Phase 3 Cart Flow.
 Branch: feat/cart-flow, tạo từ dev mới nhất.
 
 Mục tiêu:
-- Tạo cart store có persist localStorage.
+- Tạo cart store trong src/features/cart/store có persist localStorage.
 - Add to cart từ product detail, lưu productId, variantId, name, price, quantity.
 - Cart drawer hoặc cart page cho update quantity, remove item, clear cart.
 - Tính subtotal/total bằng utility money.
@@ -143,94 +143,36 @@ Commit:
 - git commit -m "feat: add cart flow"
 ```
 
-## Phase 4 - API And Auth Prompt
+## Phase 4 - Mock Auth And Saved Designs Prompt
 
 ```text
-Hãy triển khai Phase 4 API, Database, Auth.
+Hãy triển khai Phase 4 Mock Auth And Saved Designs.
 
-Branch: feat/api-auth, tạo từ dev mới nhất.
+Branch: feat/mock-auth-designs, tạo từ dev mới nhất.
 
 Mục tiêu:
-- Express TypeScript API trong apps/api.
-- Prisma schema theo BA: User, Product, ProductVariant, Category, Design, DesignItem, CartItem.
-- Seed dữ liệu mẫu tối thiểu cho 3 category và một số products.
-- Auth endpoints:
-  - POST /api/v1/auth/register
-  - POST /api/v1/auth/login
-  - POST /api/v1/auth/logout
-  - GET /api/v1/auth/me
-- Product endpoints:
-  - GET /api/v1/products
-  - GET /api/v1/products/:id
-  - GET /api/v1/categories
-- Zod validation, bcrypt hash, JWT, error handler chuẩn.
-- Không hardcode secrets; dùng .env.example.
+- Tạo auth mock ở src/features/auth và src/shared/mocks/mockAuth.ts.
+- Register/login/logout dùng localStorage/session state, không xử lý password thật.
+- Tạo saved designs ở src/features/designs.
+- Save design từ product/AR context: product, variant, transform JSON giả lập, thumbnail optional.
+- Tạo share token local và SharedDesignPage.
+- User chưa login khi save được điều hướng tới auth mock hoặc modal auth.
+- Không tạo backend, JWT thật, bcrypt, Prisma hoặc API server.
 
 Kiểm tra:
 - npm run lint
 - npm run build
-- prisma validate
-- Nếu DB local có sẵn: prisma migrate dev và seed.
-- Test API bằng curl hoặc script tối thiểu.
+- Test thủ công login/register/logout, save design, open shared design route.
 
 Commit:
 - git add .
-- git commit -m "feat: add api auth and product services"
+- git commit -m "feat: add mock auth and saved designs"
 ```
 
-## Phase 5 - Web API Integration Prompt
+## Phase 5 - PWA And Demo Prompt
 
 ```text
-Hãy triển khai Phase 5 Web API Integration.
-
-Branch: feat/web-api-integration, tạo từ dev mới nhất.
-
-Mục tiêu:
-- Tạo apiClient với base URL từ env.
-- Kết nối product catalog/detail với API.
-- Kết nối login/register/me/logout.
-- Tạo auth store/hook.
-- Loading, error, retry states rõ ràng.
-- Nếu API down, app vẫn hiển thị thông báo lỗi và không crash.
-
-Kiểm tra:
-- npm run lint
-- npm run build
-- Chạy web + api local và test happy path product + auth.
-
-Commit:
-- git add .
-- git commit -m "feat: connect web app to api"
-```
-
-## Phase 6 - Save And Share Prompt
-
-```text
-Hãy triển khai Phase 6 Save and Share Design.
-
-Branch: feat/save-share-design, tạo từ dev mới nhất.
-
-Mục tiêu:
-- API designs: list user designs, create design, get public design by shareToken, update/delete owner design.
-- Web pages: DesignsPage, SharedDesignPage.
-- Save design từ product/AR context: product, variant, transform JSON, thumbnail optional.
-- Public share link xem được không cần login.
-- User chưa login khi save được điều hướng tới login hoặc modal auth.
-
-Kiểm tra:
-- npm run lint
-- npm run build
-- Test create design, open share link, unauthorized access.
-
-Commit:
-- git add .
-- git commit -m "feat: add save and share designs"
-```
-
-## Phase 7 - PWA And Demo Prompt
-
-```text
-Hãy triển khai Phase 7 PWA, polish, demo readiness.
+Hãy triển khai Phase 5 PWA, polish, demo readiness.
 
 Branch: feat/pwa-demo-polish, tạo từ dev mới nhất.
 
@@ -257,7 +199,7 @@ Commit:
 Hãy review nhánh hiện tại trước khi merge vào dev.
 
 Yêu cầu:
-- Đóng vai code reviewer: ưu tiên bug, regression, thiếu test, rủi ro bảo mật/performance.
+- Đóng vai code reviewer: ưu tiên bug, regression, thiếu test, rủi ro performance/accessibility.
 - Kiểm tra git diff từ dev tới HEAD.
 - Chạy lint/build/test phù hợp.
 - Nếu có lỗi nhỏ, tự fix và commit bổ sung.
@@ -268,7 +210,7 @@ Yêu cầu:
 ## Prompt Release Dev To Main
 
 ```text
-Hãy chuẩn bị release TrySpace từ dev sang main.
+Hãy chuẩn bị release TrySpace frontend từ dev sang main.
 
 Yêu cầu:
 - Checkout dev, chạy full lint/build/test.
@@ -277,4 +219,3 @@ Yêu cầu:
 - Tạo tag v0.1.0 nếu đây là release MVP đầu tiên.
 - Không merge nếu có lỗi build/lint nghiêm trọng.
 ```
-
