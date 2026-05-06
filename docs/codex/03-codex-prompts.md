@@ -18,6 +18,7 @@ Yêu cầu làm việc:
 - Tạo nhánh feat/<tên-task> từ dev.
 - Implement đúng scope task, không refactor ngoài phạm vi.
 - Giữ cấu trúc React/Vite root chuẩn, không tạo monorepo, backend, Prisma hoặc Express.
+- Ưu tiên AR/3D experience trước catalog/cart/auth nếu có xung đột scope.
 - Chạy lint/build/test phù hợp.
 - git add và git commit sau khi hoàn tất.
 - Nếu test không chạy được, ghi rõ nguyên nhân và vẫn commit khi thay đổi hợp lệ.
@@ -41,10 +42,10 @@ Mục tiêu:
   - src/features
   - src/shared
   - src/styles
-- Tạo AppShell cơ bản và route/view switching nhẹ nếu cần.
+- Tạo AppShell cơ bản có chỗ đặt AR demo làm màn hình ưu tiên.
 - Cập nhật main.tsx để dùng src/app/App.tsx và src/styles/index.css.
 - Cập nhật README.md hướng dẫn chạy frontend.
-- Không implement product catalog đầy đủ ở phase này.
+- Không implement catalog/cart/auth đầy đủ ở phase này.
 - Không thêm backend/API/Prisma.
 
 Kiểm tra:
@@ -57,78 +58,116 @@ Sau cùng:
 - git commit -m "chore: set up frontend structure"
 ```
 
-## Phase 1 - Product Catalog Prompt
+## Phase 1 - AR Vertical Slice Prompt
 
 ```text
-Hãy triển khai Phase 1 Product Catalog UI cho TrySpace.
+Hãy triển khai Phase 1 AR Vertical Slice cho TrySpace.
 
-Branch: feat/product-catalog, tạo từ dev mới nhất.
+Branch: feat/ar-vertical-slice, tạo từ dev mới nhất.
 
 Nguồn yêu cầu:
-- BA sections 6, 7, 8.2, 14.
+- BA sections UC-01, FR-AR, 13.2.
 - docs/codex/00-project-structure.md
 - docs/codex/01-implementation-roadmap.md Phase 1.
 
 Mục tiêu:
-- Tạo catalog sản phẩm nội thất mẫu cho ghế, bàn, kệ sách.
-- Có search, filter category/price/color/material, sort.
-- Có product detail page với dimensions, price, variants, CTA "Thử trong phòng" và "Thêm vào giỏ".
-- Responsive từ mobile 375px đến desktop.
+- Cài @google/model-viewer và three nếu chưa có.
+- Tạo một trang AR demo với một sản phẩm nội thất mẫu.
+- Tạo ModelViewer React component dùng custom element <model-viewer>.
+- Hỗ trợ ar, ar-modes="webxr scene-viewer quick-look", camera-controls, poster/loading/error states.
+- Desktop fallback là 3D orbit viewer.
+- Có ArSupportNotice và hướng dẫn khi AR/camera không khả dụng.
+- Không cần catalog đầy đủ trong phase này.
 
 Yêu cầu kỹ thuật:
-- Dùng TypeScript strict-friendly.
-- Đặt code products trong src/features/products.
-- Đặt UI primitive dùng chung trong src/components/ui.
-- Không gọi API thật; dùng static data/mock trong frontend.
-- UI không dùng landing page marketing làm màn hình chính; vào thẳng trải nghiệm catalog/product.
+- Đặt AR code trong src/features/ar.
+- Đặt featured product data trong src/features/products/data.
+- Nếu chưa có GLB hợp lệ, dùng path placeholder rõ ràng và UI error/retry không crash.
+- Không hand-roll WebXR phức tạp; dùng @google/model-viewer trước.
 
 Kiểm tra:
 - npm run lint
 - npm run build
-- Test thủ công search/filter/empty state/product detail.
+- Mở app local và kiểm tra viewer không blank trên desktop nếu có asset hợp lệ.
+- Ghi checklist thủ công cho Chrome desktop, Android Chrome, iOS Safari.
+
+Commit:
+- git add .
+- git commit -m "feat: add ar vertical slice"
+```
+
+## Phase 2 - AR Product Experience Prompt
+
+```text
+Hãy triển khai Phase 2 AR Product Experience cho TrySpace.
+
+Branch: feat/ar-product-experience, tạo từ dev mới nhất.
+
+Mục tiêu:
+- Tạo product try-on page tập trung vào 3D/AR.
+- Thêm VariantSelector cho màu/vật liệu.
+- Variant state phải ảnh hưởng UI/giá và nếu asset hỗ trợ thì đổi material/model trong viewer.
+- Thêm ProductSpecs, ProductHero, ArActionBar, ArPlacementTips.
+- CTA chính là "Thử trong phòng".
+- CTA phụ "Thêm vào giỏ" và "Lưu thiết kế demo" có thể placeholder nếu feature sau chưa có.
+
+Yêu cầu kỹ thuật:
+- Tái sử dụng ModelViewer từ Phase 1.
+- Không reset model khi đổi variant.
+- Mobile layout phải giữ nút AR dễ bấm.
+- Không tạo backend/API.
+
+Kiểm tra:
+- npm run lint
+- npm run build
+- Test thủ công đổi variant, AR CTA, fallback, loading/error.
+
+Commit:
+- git add .
+- git commit -m "feat: build ar product experience"
+```
+
+## Phase 3 - Product Catalog Prompt
+
+```text
+Hãy triển khai Phase 3 Product Catalog UI cho TrySpace.
+
+Branch: feat/product-catalog, tạo từ dev mới nhất.
+
+Mục tiêu:
+- Tạo catalog sản phẩm nội thất mẫu cho ghế, bàn, kệ sách.
+- Có search, filter category/price/color/material, sort.
+- Có product detail page với dimensions, price, variants.
+- Product detail phải dẫn rõ về AR/3D experience đã có.
+- Responsive từ mobile 375px đến desktop.
+
+Yêu cầu kỹ thuật:
+- Đặt code products trong src/features/products.
+- Đặt UI primitive dùng chung trong src/components/ui.
+- Không gọi API thật; dùng static data/mock trong frontend.
+- Không làm landing page marketing; ưu tiên trải nghiệm chọn sản phẩm rồi thử AR.
+
+Kiểm tra:
+- npm run lint
+- npm run build
+- Test thủ công search/filter/empty state/product detail/try AR link.
 
 Commit:
 - git add .
 - git commit -m "feat: add product catalog experience"
 ```
 
-## Phase 2 - AR Viewer Prompt
+## Phase 4 - Cart Flow Prompt
 
 ```text
-Hãy triển khai Phase 2 3D Viewer và AR Entry.
-
-Branch: feat/ar-viewer, tạo từ dev mới nhất.
-
-Mục tiêu:
-- Cài @google/model-viewer và three nếu chưa có.
-- Tạo ModelViewer React component dùng custom element <model-viewer>.
-- Hỗ trợ ar, ar-modes="webxr scene-viewer quick-look", camera-controls, poster/loading/error states.
-- Tích hợp vào product detail.
-- Tạo VariantSelector cho đổi màu/vật liệu; nếu model không hỗ trợ đổi material runtime thì lưu state variant và phản ánh UI/giá trước.
-- Có fallback message khi AR không khả dụng.
-- Đặt AR code trong src/features/ar và VariantSelector trong src/features/products.
-
-Kiểm tra:
-- npm run lint
-- npm run build
-- Mở app local và kiểm tra 3D viewer không blank trên desktop.
-- Ghi checklist thủ công nếu không có thiết bị mobile trong môi trường hiện tại.
-
-Commit:
-- git add .
-- git commit -m "feat: add ar model viewer"
-```
-
-## Phase 3 - Cart Flow Prompt
-
-```text
-Hãy triển khai Phase 3 Cart Flow.
+Hãy triển khai Phase 4 Cart Flow.
 
 Branch: feat/cart-flow, tạo từ dev mới nhất.
 
 Mục tiêu:
 - Tạo cart store trong src/features/cart/store có persist localStorage.
-- Add to cart từ product detail, lưu productId, variantId, name, price, quantity.
+- Add to cart từ product detail và AR product panel.
+- Lưu productId, variantId, name, price, quantity.
 - Cart drawer hoặc cart page cho update quantity, remove item, clear cart.
 - Tính subtotal/total bằng utility money.
 - Checkout placeholder không thanh toán thật.
@@ -137,16 +176,17 @@ Kiểm tra:
 - npm run lint
 - npm run build
 - Test thủ công reload vẫn giữ cart, quantity không nhỏ hơn 1.
+- Test AR flow không bị cart UI che hoặc phá layout mobile.
 
 Commit:
 - git add .
 - git commit -m "feat: add cart flow"
 ```
 
-## Phase 4 - Mock Auth And Saved Designs Prompt
+## Phase 5 - Mock Auth And Saved Designs Prompt
 
 ```text
-Hãy triển khai Phase 4 Mock Auth And Saved Designs.
+Hãy triển khai Phase 5 Mock Auth And Saved Designs.
 
 Branch: feat/mock-auth-designs, tạo từ dev mới nhất.
 
@@ -154,7 +194,7 @@ Mục tiêu:
 - Tạo auth mock ở src/features/auth và src/shared/mocks/mockAuth.ts.
 - Register/login/logout dùng localStorage/session state, không xử lý password thật.
 - Tạo saved designs ở src/features/designs.
-- Save design từ product/AR context: product, variant, transform JSON giả lập, thumbnail optional.
+- Save design từ AR/product context: product, variant, transform JSON giả lập, thumbnail optional.
 - Tạo share token local và SharedDesignPage.
 - User chưa login khi save được điều hướng tới auth mock hoặc modal auth.
 - Không tạo backend, JWT thật, bcrypt, Prisma hoặc API server.
@@ -162,35 +202,35 @@ Mục tiêu:
 Kiểm tra:
 - npm run lint
 - npm run build
-- Test thủ công login/register/logout, save design, open shared design route.
+- Test thủ công login/register/logout, save design từ AR/product, open shared design route.
 
 Commit:
 - git add .
 - git commit -m "feat: add mock auth and saved designs"
 ```
 
-## Phase 5 - PWA And Demo Prompt
+## Phase 6 - PWA And Demo Prompt
 
 ```text
-Hãy triển khai Phase 5 PWA, polish, demo readiness.
+Hãy triển khai Phase 6 PWA, polish, demo readiness.
 
 Branch: feat/pwa-demo-polish, tạo từ dev mới nhất.
 
 Mục tiêu:
 - Thêm manifest.webmanifest, icons, theme color.
 - Cải thiện loading states, empty states, mobile layout.
-- Tạo docs/demo-script.md cho luồng demo 5 phút.
+- Tạo docs/demo-script.md cho luồng demo AR 3-5 phút.
 - Tạo docs/test-checklist.md cho Chrome desktop, Android Chrome, iOS Safari.
 - Chạy Lighthouse hoặc ghi rõ nếu môi trường không hỗ trợ.
 
 Kiểm tra:
 - npm run lint
 - npm run build
-- Manual test checklist.
+- Manual test checklist, ưu tiên AR viewer và mobile AR CTA.
 
 Commit:
 - git add .
-- git commit -m "feat: prepare pwa demo experience"
+- git commit -m "feat: prepare ar demo pwa experience"
 ```
 
 ## Prompt Review Trước Khi Merge Vào Dev
@@ -200,6 +240,7 @@ Hãy review nhánh hiện tại trước khi merge vào dev.
 
 Yêu cầu:
 - Đóng vai code reviewer: ưu tiên bug, regression, thiếu test, rủi ro performance/accessibility.
+- Nếu branch có AR/3D, kiểm tra kỹ loading/error/fallback và mobile layout.
 - Kiểm tra git diff từ dev tới HEAD.
 - Chạy lint/build/test phù hợp.
 - Nếu có lỗi nhỏ, tự fix và commit bổ sung.
@@ -215,6 +256,7 @@ Hãy chuẩn bị release TrySpace frontend từ dev sang main.
 Yêu cầu:
 - Checkout dev, chạy full lint/build/test.
 - Đọc docs/test-checklist.md và xác nhận các mục có thể kiểm tra trong môi trường hiện tại.
+- Ưu tiên xác nhận AR happy path trước: desktop 3D viewer, mobile AR CTA, fallback khi AR không hỗ trợ.
 - Nếu pass, checkout main và merge --no-ff dev.
 - Tạo tag v0.1.0 nếu đây là release MVP đầu tiên.
 - Không merge nếu có lỗi build/lint nghiêm trọng.

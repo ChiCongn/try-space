@@ -10,10 +10,11 @@ Bộ tài liệu này biến bản BA `docs/TrySpace_BA_Document.md` thành kế
 ## Thứ Tự Sử Dụng
 
 1. Đọc [00-project-structure.md](./00-project-structure.md) để nắm cấu trúc repo chuẩn.
-2. Đọc [01-implementation-roadmap.md](./01-implementation-roadmap.md) để biết app sẽ được chia phase nào, mỗi phase tạo file gì.
+2. Đọc [01-implementation-roadmap.md](./01-implementation-roadmap.md) để biết roadmap AR-first và thứ tự phase.
 3. Dùng [02-git-workflow.md](./02-git-workflow.md) làm quy trình bắt buộc cho branch, commit, merge.
 4. Copy prompt từ [03-codex-prompts.md](./03-codex-prompts.md) cho từng task cụ thể.
-5. Làm theo [04-codex-usage-guide.md](./04-codex-usage-guide.md) khi bắt đầu một phiên Codex mới.
+5. Dùng [05-agent-prompts.md](./05-agent-prompts.md) khi muốn giao việc theo vai trò agent.
+6. Làm theo [04-codex-usage-guide.md](./04-codex-usage-guide.md) khi bắt đầu một phiên Codex mới.
 
 ## Quy Ước Triển Khai
 
@@ -34,6 +35,18 @@ tryspace-codex/
 ```
 
 Chi tiết folder-level nằm ở [00-project-structure.md](./00-project-structure.md). Không tạo backend/monorepo trong phạm vi này; các phần auth, cart, save/share dùng mock/localStorage để phục vụ demo frontend.
+
+## Ưu Tiên Triển Khai
+
+Ưu tiên làm các tính năng AR trước:
+
+1. `feat/frontend-foundation`
+2. `feat/ar-vertical-slice`
+3. `feat/ar-product-experience`
+4. `feat/product-catalog`
+5. `feat/cart-flow`
+6. `feat/mock-auth-designs`
+7. `feat/pwa-demo-polish`
 
 ## Definition Of Done Chung
 
