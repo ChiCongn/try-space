@@ -107,14 +107,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="category-strip">
-        {["sofa", "chair", "table", "shelf", "lamp"].map((category) => (
-          <Link key={category} to={`/catalog?category=${category}`}>
-            {category}
-          </Link>
-        ))}
-      </section>
-
       <section className="cta-banner">
         <h2>Bắt đầu thiết kế không gian của bạn</h2>
         <Link className="primary-link" to="/catalog">
@@ -123,8 +115,19 @@ export function LandingPage() {
       </section>
 
       <footer className="landing-footer">
-        <span>TrySpace</span>
-        <p>Student Project · AR furniture web app</p>
+        <div className="footer-top">
+          <div className="footer-brand">
+            <span className="footer-logo">TrySpace</span>
+
+            <p>
+              Trải nghiệm nội thất AR trực tiếp trong không gian thật của bạn.
+            </p>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <span>© 2026 TrySpace. All rights reserved.</span>
+        </div>
       </footer>
     </main>
   );

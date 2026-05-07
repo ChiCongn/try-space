@@ -55,7 +55,7 @@
   },
   {
     "id": "p003",
-    "name": "Bàn gỗ óc chó tự nhiên",
+    "name": "Wooden Table Set",
     "collection": "Walnut Series",
     "category": "table",
     "basePrice": 8900000,
@@ -68,9 +68,9 @@
       { "id": "m2", "name": "Gỗ ghép dày", "surcharge": -500000 }
     ],
     "dimensions": { "w": 180, "d": 90, "h": 75 },
-    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb",
+    "modelUrl": "/public/models/wooden_table_set-1k.glb",
     "images": [
-      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/screenshot/screenshot.jpg"
+      "/public/models/wooden-table-set.png"
     ],
     "arSupported": true,
     "tags": ["wood", "dining", "natural", "table"],
@@ -96,7 +96,7 @@
     "dimensions": { "w": 80, "d": 30, "h": 180 },
     "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb",
     "images": [
-      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/screenshot/screenshot.png"
+      "/src/assets/models/wooden-table-set.png"
     ],
     "arSupported": true,
     "tags": ["storage", "modular", "bookshelf", "shelf"],
@@ -204,6 +204,157 @@
     "tags": ["leather", "sofa", "premium"],
     "rating": 4.9,
     "reviewCount": 71,
+    "inStock": true
+  },
+  {
+    "id": "p009",
+    "name": "Bàn trà Orbit Stone",
+    "collection": "Contemporary Forms",
+    "category": "table",
+    "basePrice": 4900000,
+    "colors": [
+      { "id": "c1", "name": "Travertine", "hex": "#d8ccb8" },
+      { "id": "c2", "name": "Đen basalt", "hex": "#2a2a2a" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Đá nung", "surcharge": 0 },
+      { "id": "m2", "name": "Đá marble Ý", "surcharge": 1200000 }
+    ],
+    "dimensions": { "w": 90, "d": 90, "h": 35 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/glTF-Binary/DragonAttenuation.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/screenshot/screenshot.png"
+    ],
+    "arSupported": true,
+    "tags": ["coffee-table", "stone", "living-room"],
+    "rating": 4.7,
+    "reviewCount": 51,
+    "inStock": true
+  },
+  {
+    "id": "p010",
+    "name": "Bàn làm việc Aero Oak",
+    "collection": "Studio Workspace",
+    "category": "table",
+    "basePrice": 7200000,
+    "colors": [
+      { "id": "c1", "name": "Oak sáng", "hex": "#d6b58b" },
+      { "id": "c2", "name": "Walnut", "hex": "#6f4a2f" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Gỗ sồi Mỹ", "surcharge": 0 },
+      { "id": "m2", "name": "Khung thép đen", "surcharge": 500000 }
+    ],
+    "dimensions": { "w": 140, "d": 70, "h": 75 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["desk", "workspace", "oak"],
+    "rating": 4.6,
+    "reviewCount": 84,
+    "inStock": true
+  },
+  {
+    "id": "p011",
+    "name": "Ghế ăn Mono Curve",
+    "collection": "Dining Essentials",
+    "category": "chair",
+    "basePrice": 2650000,
+    "colors": [
+      { "id": "c1", "name": "Kem", "hex": "#ece5da" },
+      { "id": "c2", "name": "Xanh olive", "hex": "#6f7b5c" },
+      { "id": "c3", "name": "Than chì", "hex": "#3c3c3c" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "PP cao cấp", "surcharge": 0 },
+      { "id": "m2", "name": "Da microfiber", "surcharge": 450000 }
+    ],
+    "dimensions": { "w": 52, "d": 56, "h": 82 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/glTF-Binary/SheenChair.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["dining-chair", "minimal", "chair"],
+    "rating": 4.8,
+    "reviewCount": 112,
+    "inStock": true
+  },
+  {
+    "id": "p012",
+    "name": "Tủ TV Horizon",
+    "collection": "Living Core",
+    "category": "shelf",
+    "basePrice": 6100000,
+    "colors": [
+      { "id": "c1", "name": "Walnut", "hex": "#6b4226" },
+      { "id": "c2", "name": "Ash grey", "hex": "#8a8f95" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Gỗ veneer", "surcharge": 0 },
+      { "id": "m2", "name": "Gỗ óc chó thật", "surcharge": 1400000 }
+    ],
+    "dimensions": { "w": 180, "d": 40, "h": 48 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/screenshot/screenshot.png"
+    ],
+    "arSupported": true,
+    "tags": ["tv-console", "storage", "living-room"],
+    "rating": 4.5,
+    "reviewCount": 63,
+    "inStock": true
+  },
+  {
+    "id": "p013",
+    "name": "Đèn thả Halo Pendant",
+    "collection": "Lighting Studio",
+    "category": "lamp",
+    "basePrice": 3400000,
+    "colors": [
+      { "id": "c1", "name": "Gold", "hex": "#d4a017" },
+      { "id": "c2", "name": "Matte Black", "hex": "#1f1f1f" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Nhôm anodized", "surcharge": 0 },
+      { "id": "m2", "name": "Đồng brushed", "surcharge": 700000 }
+    ],
+    "dimensions": { "w": 60, "d": 60, "h": 120 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnisotropyBarnLamp/glTF-Binary/AnisotropyBarnLamp.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnisotropyBarnLamp/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["pendant", "lighting", "modern"],
+    "rating": 4.7,
+    "reviewCount": 38,
+    "inStock": true
+  },
+  {
+    "id": "p014",
+    "name": "Giường ngủ Kyoto Platform",
+    "collection": "Japandi Rest",
+    "category": "bed",
+    "basePrice": 13200000,
+    "colors": [
+      { "id": "c1", "name": "Natural Oak", "hex": "#c9a87a" },
+      { "id": "c2", "name": "Smoked Walnut", "hex": "#5c4033" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Gỗ sồi Nhật", "surcharge": 0 },
+      { "id": "m2", "name": "Headboard linen", "surcharge": 900000 }
+    ],
+    "dimensions": { "w": 220, "d": 180, "h": 92 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/glTF-Binary/SheenWoodLeatherSofa.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["bed", "japandi", "bedroom"],
+    "rating": 4.9,
+    "reviewCount": 44,
     "inStock": true
   }
 ]

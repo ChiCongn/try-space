@@ -1,7 +1,18 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, Share2, ShoppingBag, View, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Heart,
+  Maximize2,
+  Ruler,
+  ScanLine,
+  Share2,
+  ShoppingBag,
+  Star,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { productsApi } from "../api/products.api";
 import { ModelViewer } from "../features/ar/components/ModelViewer";
 import { formatVnd } from "../shared/lib/money";
@@ -9,265 +20,500 @@ import { useCartStore } from "../stores/cartStore";
 import { useWishlistStore } from "../stores/wishlistStore";
 import type { Product, ProductColor, ProductMaterial } from "../types";
 
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+
+  show: {
+    opacity: 1,
+    y: 0,
+
+    transition: {
+      duration: 0.38,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
+
 export function ProductDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeImg, setActiveImg] = useState(0);
   const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
   const [selectedMaterial, setSelectedMaterial] =
     useState<ProductMaterial | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [added, setAdded] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const addItem = useCartStore((state) => state.addItem);
-  const toggleWishlist = useWishlistStore((state) => state.toggle);
-  const isWished = useWishlistStore((state) =>
-    product ? state.isWished(product.id) : false,
+
+  const addItem = useCartStore((s) => s.addItem);
+  const toggleWishlist = useWishlistStore((s) => s.toggle);
+  const isWished = useWishlistStore((s) =>
+    product ? s.isWished(product.id) : false,
   );
 
   useEffect(() => {
-    if (!id) {
-      return;
-    }
-
-    let isMounted = true;
-
+    if (!id) return;
+    let live = true;
+    setIsLoading(true);
     productsApi
       .getById(id)
-      .then((response) => {
-        if (!isMounted) {
-          return;
-        }
-
-        setProduct(response.data);
-        setSelectedColor(response.data.colors[0]);
-        setSelectedMaterial(response.data.materials[0]);
+      .then((res) => {
+        if (!live) return;
+        setProduct(res.data);
+        setSelectedColor(res.data.colors[0]);
+        setSelectedMaterial(res.data.materials[0]);
+        setActiveImg(0);
       })
       .catch(() => {
-        if (isMounted) {
-          setProduct(null);
-        }
+        if (live) setProduct(null);
       })
       .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (live) setIsLoading(false);
       });
-
     return () => {
-      isMounted = false;
+      live = false;
     };
   }, [id]);
 
   const finalPrice = useMemo(() => {
-    if (!product || !selectedMaterial) {
-      return 0;
-    }
-
+    if (!product || !selectedMaterial) return 0;
     return product.basePrice + selectedMaterial.surcharge;
   }, [product, selectedMaterial]);
 
+  function handleAddToCart() {
+    if (!product || !selectedColor || !selectedMaterial) return;
+    addItem(product, selectedColor, selectedMaterial);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  }
+
   function saveDesign() {
-    if (!product || !selectedColor || !selectedMaterial) {
-      return;
-    }
-
+    if (!product || !selectedColor || !selectedMaterial) return;
     const hash = `design_${Date.now().toString(36)}`;
-    const saved = {
-      hash,
-      productId: product.id,
-      selectedColor,
-      selectedMaterial,
-    };
-    localStorage.setItem(`tryspace-design-${hash}`, JSON.stringify(saved));
-    setToast(`/design/${hash}`);
-    window.setTimeout(() => setToast(null), 3200);
+    localStorage.setItem(
+      `tryspace-design-${hash}`,
+      JSON.stringify({
+        hash,
+        productId: product.id,
+        selectedColor,
+        selectedMaterial,
+      }),
+    );
+    setToast(`Đã lưu thiết kế`);
+    setTimeout(() => setToast(null), 3000);
   }
 
+  /* ── Loading ── */
   if (isLoading) {
-    return <div className="page-loading">Đang tải sản phẩm...</div>;
+    return (
+      <div className="pdp-skeleton-wrap">
+        <div className="pdp-skeleton-img" />
+        <div className="pdp-skeleton-body">
+          <div className="pdp-skeleton-line pdp-skeleton-line--short" />
+          <div className="pdp-skeleton-line pdp-skeleton-line--title" />
+          <div className="pdp-skeleton-line" />
+          <div className="pdp-skeleton-line pdp-skeleton-line--short" />
+        </div>
+      </div>
+    );
   }
 
+  /* ── Not found ── */
   if (!product || !selectedColor || !selectedMaterial) {
     return (
-      <div className="empty-panel page-empty">
-        Không tìm thấy sản phẩm. <Link to="/catalog">Về catalog</Link>
+      <div className="pdp-not-found">
+        <span>◎</span>
+        <p>Không tìm thấy sản phẩm</p>
+        <Link to="/catalog">← Về catalog</Link>
       </div>
     );
   }
 
   return (
-    <section className="detail-page-new">
-      <nav className="breadcrumb" aria-label="Breadcrumb">
-        <Link to="/">Home</Link>
-        <span>/</span>
-        <Link to={`/catalog?category=${product.category}`}>{product.category}</Link>
-        <span>/</span>
-        <span>{product.name}</span>
-      </nav>
+    <div className="pdp">
+      {/* ── Floating back button ── */}
+      <button
+        aria-label="Quay lại"
+        className="pdp__back"
+        type="button"
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft size={18} strokeWidth={2} />
+      </button>
 
-      <div className="detail-layout-new">
-        <div className="detail-gallery">
-          <motion.div className="detail-main-image" layoutId={product.id}>
-            <img src={product.images[0]} alt={product.name} />
-            {product.modelUrl ? (
+      <div className="pdp__inner">
+        {/* ════════════════════════════════
+            LEFT — Gallery
+            ════════════════════════════════ */}
+        <div className="pdp__gallery">
+          {/* Main image */}
+          <motion.div
+            className="pdp__main-img"
+            layoutId={`product-img-${product.id}`}
+          >
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={activeImg}
+                alt={product.name}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.02 }}
+                initial={{ opacity: 0, scale: 0.98 }}
+                src={product.images[activeImg]}
+                transition={{ duration: 0.25 }}
+              />
+            </AnimatePresence>
+
+            {/* Stock badge */}
+            <span
+              className={`pdp__stock-badge ${product.inStock ? "pdp__stock-badge--in" : "pdp__stock-badge--out"}`}
+            >
+              {product.inStock ? "Còn hàng" : "Hết hàng"}
+            </span>
+
+            {/* 3D viewer trigger */}
+            {product.modelUrl && (
               <button
-                className="viewer-float-button"
-                onClick={() => setViewerOpen(true)}
+                className="pdp__3d-btn"
                 type="button"
+                onClick={() => setViewerOpen(true)}
               >
-                <View size={17} /> Xem 3D
+                <Maximize2 size={14} strokeWidth={2} />
+                Xem 3D
               </button>
-            ) : null}
+            )}
           </motion.div>
-          <div className="thumb-row">
-            {product.images.map((image) => (
-              <img key={image} src={image} alt="" />
-            ))}
-          </div>
-        </div>
 
-        <aside className="detail-info-panel">
-          <span className="collection-label">{product.collection}</span>
-          <h1>{product.name}</h1>
-          <div className="detail-rating">
-            <strong>{product.rating}</strong>
-            <span>{product.reviewCount} đánh giá</span>
-            <span>{product.inStock ? "Còn hàng" : "Tạm hết hàng"}</span>
-          </div>
-
-          <div className="detail-price">
-            <strong>{formatVnd(finalPrice)}</strong>
-            {selectedMaterial.surcharge !== 0 ? (
-              <span>{formatVnd(product.basePrice)}</span>
-            ) : null}
-          </div>
-
-          <section className="option-section">
-            <div className="option-heading">
-              <span>Màu sắc</span>
-              <strong>{selectedColor.name}</strong>
-            </div>
-            <div className="color-options">
-              {product.colors.map((color) => (
+          {/* Thumbnail strip */}
+          {product.images.length > 1 && (
+            <div className="pdp__thumbs" role="group" aria-label="Ảnh sản phẩm">
+              {product.images.map((img, i) => (
                 <button
-                  aria-label={color.name}
-                  aria-pressed={selectedColor.id === color.id}
-                  key={color.id}
-                  onClick={() => setSelectedColor(color)}
-                  style={{ backgroundColor: color.hex }}
+                  aria-label={`Ảnh ${i + 1}`}
+                  aria-pressed={activeImg === i}
+                  className={`pdp__thumb ${activeImg === i ? "pdp__thumb--active" : ""}`}
+                  key={img}
                   type="button"
-                />
-              ))}
-            </div>
-          </section>
-
-          <section className="option-section">
-            <div className="option-heading">
-              <span>Vật liệu</span>
-              <strong>{selectedMaterial.name}</strong>
-            </div>
-            <div className="material-options">
-              {product.materials.map((material) => (
-                <button
-                  aria-pressed={selectedMaterial.id === material.id}
-                  key={material.id}
-                  onClick={() => setSelectedMaterial(material)}
-                  type="button"
+                  onClick={() => setActiveImg(i)}
                 >
-                  {material.name}
-                  {material.surcharge !== 0 ? (
-                    <span>{formatVnd(material.surcharge)}</span>
-                  ) : null}
+                  <img alt="" src={img} />
                 </button>
               ))}
             </div>
-          </section>
+          )}
+        </div>
 
-          <section className="dimensions-grid" aria-label="Kích thước">
-            <div>
-              <strong>{product.dimensions.w}</strong>
-              <span>Rộng</span>
-            </div>
-            <div>
-              <strong>{product.dimensions.d}</strong>
-              <span>Sâu</span>
-            </div>
-            <div>
-              <strong>{product.dimensions.h}</strong>
-              <span>Cao</span>
-            </div>
-          </section>
+        {/* ════════════════════════════════
+            RIGHT — Info panel
+            ════════════════════════════════ */}
+        <motion.aside
+          animate="show"
+          className="pdp__panel"
+          initial="hidden"
+          variants={stagger}
+        >
+          {/* Breadcrumb */}
+          <motion.nav
+            aria-label="Breadcrumb"
+            className="pdp__crumb"
+            variants={fadeUp}
+          >
+            <Link to="/">Trang chủ</Link>
+            <span aria-hidden>·</span>
+            <Link to={`/catalog?category=${product.category}`}>
+              {product.category}
+            </Link>
+            <span aria-hidden>·</span>
+            <span>{product.name}</span>
+          </motion.nav>
 
-          <p className="detail-copy">
+          {/* Collection tag */}
+          <motion.span className="pdp__collection" variants={fadeUp}>
+            {product.collection}
+          </motion.span>
+
+          {/* Product name */}
+          <motion.h1 className="pdp__name" variants={fadeUp}>
+            {product.name}
+          </motion.h1>
+
+          {/* Rating row */}
+          <motion.div className="pdp__rating" variants={fadeUp}>
+            <span className="pdp__stars" aria-label={`${product.rating} sao`}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  size={13}
+                  fill={
+                    i < Math.round(product.rating) ? "currentColor" : "none"
+                  }
+                  strokeWidth={1.5}
+                />
+              ))}
+            </span>
+            <strong>{product.rating}</strong>
+            <span className="pdp__rating-sep" aria-hidden />
+            <span>{product.reviewCount} đánh giá</span>
+          </motion.div>
+
+          {/* Price */}
+          <motion.div className="pdp__price-row" variants={fadeUp}>
+            <strong className="pdp__price">{formatVnd(finalPrice)}</strong>
+            {selectedMaterial.surcharge !== 0 && (
+              <span className="pdp__price-base">
+                {formatVnd(product.basePrice)}
+              </span>
+            )}
+            {selectedMaterial.surcharge > 0 && (
+              <span className="pdp__surcharge">
+                +{formatVnd(selectedMaterial.surcharge)} vật liệu
+              </span>
+            )}
+          </motion.div>
+
+          <div className="pdp__divider" />
+
+          {/* Color picker */}
+          <motion.section className="pdp__option" variants={fadeUp}>
+            <div className="pdp__option-head">
+              <span className="pdp__option-label">Màu sắc</span>
+              <strong className="pdp__option-value">
+                {selectedColor.name}
+              </strong>
+            </div>
+            <div className="pdp__colors" role="group" aria-label="Chọn màu sắc">
+              {product.colors.map((color) => {
+                const active = selectedColor.id === color.id;
+                return (
+                  <button
+                    aria-label={color.name}
+                    aria-pressed={active}
+                    className={`pdp__color-btn ${active ? "pdp__color-btn--active" : ""}`}
+                    key={color.id}
+                    style={{ "--swatch": color.hex } as React.CSSProperties}
+                    type="button"
+                    onClick={() => setSelectedColor(color)}
+                  >
+                    {active && (
+                      <motion.span
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="pdp__color-check"
+                        initial={{ scale: 0, opacity: 0 }}
+                      >
+                        <Check size={10} strokeWidth={3} />
+                      </motion.span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.section>
+
+          {/* Material picker */}
+          <motion.section className="pdp__option" variants={fadeUp}>
+            <div className="pdp__option-head">
+              <span className="pdp__option-label">Vật liệu</span>
+              <strong className="pdp__option-value">
+                {selectedMaterial.name}
+              </strong>
+            </div>
+            <div
+              className="pdp__materials"
+              role="group"
+              aria-label="Chọn vật liệu"
+            >
+              {product.materials.map((mat) => {
+                const active = selectedMaterial.id === mat.id;
+                return (
+                  <button
+                    aria-pressed={active}
+                    className={`pdp__mat-btn ${active ? "pdp__mat-btn--active" : ""}`}
+                    key={mat.id}
+                    type="button"
+                    onClick={() => setSelectedMaterial(mat)}
+                  >
+                    <span className="pdp__mat-name">{mat.name}</span>
+                    {mat.surcharge !== 0 && (
+                      <span className="pdp__mat-price">
+                        +{formatVnd(mat.surcharge)}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.section>
+
+          {/* Dimensions */}
+          <motion.section
+            aria-label="Kích thước (cm)"
+            className="pdp__dims"
+            variants={fadeUp}
+          >
+            <div className="pdp__dim-head">
+              <Ruler size={13} strokeWidth={2} aria-hidden />
+              <span>Kích thước (cm)</span>
+            </div>
+            <div className="pdp__dim-grid">
+              {(
+                [
+                  ["W", product.dimensions.w, "Rộng"],
+                  ["D", product.dimensions.d, "Sâu"],
+                  ["H", product.dimensions.h, "Cao"],
+                ] as const
+              ).map(([axis, val, label]) => (
+                <div className="pdp__dim-cell" key={axis}>
+                  <strong className="pdp__dim-val">{val}</strong>
+                  <span className="pdp__dim-label">{label}</span>
+                  <span className="pdp__dim-axis">{axis}</span>
+                </div>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* Description */}
+          <motion.p className="pdp__desc" variants={fadeUp}>
             Mẫu thuộc {product.collection}, hỗ trợ preview 3D/AR với kích thước
             mô phỏng theo đơn vị centimet để bạn kiểm tra tỷ lệ trong phòng.
-          </p>
+          </motion.p>
 
-          <div className="detail-cta-row">
-            <button
-              className="primary-link"
+          <div className="pdp__divider" />
+
+          {/* CTA row */}
+          <motion.div className="pdp__cta" variants={fadeUp}>
+            <motion.button
+              animate={added ? { scale: [1, 0.95, 1] } : {}}
+              className={`pdp__add-btn ${added ? "pdp__add-btn--added" : ""}`}
               disabled={!product.inStock}
-              onClick={() => addItem(product, selectedColor, selectedMaterial)}
               type="button"
+              onClick={handleAddToCart}
             >
-              <ShoppingBag size={17} /> Thêm vào giỏ
-            </button>
+              <AnimatePresence mode="wait">
+                {added ? (
+                  <motion.span
+                    animate={{ opacity: 1, y: 0 }}
+                    className="pdp__add-btn-inner"
+                    exit={{ opacity: 0, y: -8 }}
+                    initial={{ opacity: 0, y: 8 }}
+                    key="added"
+                  >
+                    <Check size={17} strokeWidth={2.5} />
+                    Đã thêm
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    animate={{ opacity: 1, y: 0 }}
+                    className="pdp__add-btn-inner"
+                    exit={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: -8 }}
+                    key="add"
+                  >
+                    <ShoppingBag size={17} strokeWidth={1.8} />
+                    Thêm vào giỏ
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+
             <button
+              aria-label={isWished ? "Bỏ yêu thích" : "Yêu thích"}
               aria-pressed={isWished}
-              className="square-action"
-              onClick={() => toggleWishlist(product)}
+              className={`pdp__icon-btn ${isWished ? "pdp__icon-btn--wished" : ""}`}
               type="button"
-              aria-label="Yêu thích"
+              onClick={() => toggleWishlist(product)}
             >
               <Heart size={18} fill={isWished ? "currentColor" : "none"} />
             </button>
+
             <button
-              className="square-action"
-              onClick={saveDesign}
-              type="button"
               aria-label="Lưu thiết kế"
+              className="pdp__icon-btn"
+              type="button"
+              onClick={saveDesign}
             >
               <Share2 size={18} />
             </button>
-          </div>
+          </motion.div>
 
-          <Link
-            className="ar-link"
-            to={`/ar/${product.id}?color=${selectedColor.id}&material=${selectedMaterial.id}`}
-          >
-            <View size={17} /> Thử trong phòng
-          </Link>
-        </aside>
+          {/* AR link */}
+          {product.arSupported && (
+            <motion.div variants={fadeUp}>
+              <Link
+                className="pdp__ar-btn"
+                to={`/ar/${product.id}?color=${selectedColor.id}&material=${selectedMaterial.id}`}
+              >
+                <span className="pdp__ar-glow" aria-hidden />
+                <ScanLine size={18} strokeWidth={1.8} aria-hidden />
+                Thử trong phòng của bạn
+              </Link>
+            </motion.div>
+          )}
+        </motion.aside>
       </div>
 
+      {/* ── 3D Viewer modal ── */}
       <AnimatePresence>
-        {viewerOpen && product.modelUrl ? (
-          <div className="viewer-modal" role="dialog" aria-modal="true">
+        {viewerOpen && product.modelUrl && (
+          <motion.div
+            animate={{ opacity: 1 }}
+            aria-modal="true"
+            className="pdp__viewer-overlay"
+            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            role="dialog"
+          >
             <motion.div
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              initial={{ opacity: 0, scale: 0.97 }}
-              className="viewer-modal-card"
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="pdp__viewer-card"
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ duration: 0.22 }}
             >
-              <button
-                onClick={() => setViewerOpen(false)}
-                type="button"
-                aria-label="Đóng viewer"
-              >
-                <X size={18} />
-              </button>
-              <ModelViewer
-                alt={`3D model của ${product.name}`}
-                poster={product.images[0]}
-                selectedColor={selectedColor.hex}
-                src={product.modelUrl}
-              />
+              <div className="pdp__viewer-header">
+                <span>{product.name} — 3D</span>
+                <button
+                  aria-label="Đóng"
+                  className="pdp__viewer-close"
+                  type="button"
+                  onClick={() => setViewerOpen(false)}
+                >
+                  <X size={17} />
+                </button>
+              </div>
+              <div className="pdp__viewer-frame">
+                <ModelViewer
+                  alt={`3D model của ${product.name}`}
+                  poster={product.images[0]}
+                  selectedColor={selectedColor.hex}
+                  src={product.modelUrl}
+                />
+              </div>
             </motion.div>
-          </div>
-        ) : null}
+          </motion.div>
+        )}
       </AnimatePresence>
 
-      {toast ? <div className="toast">Đã lưu thiết kế: {toast}</div> : null}
-    </section>
+      {/* ── Toast ── */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            className="pdp__toast"
+            exit={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 12 }}
+          >
+            <Check size={14} strokeWidth={2.5} />
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
