@@ -1,0 +1,209 @@
+[
+  {
+    "id": "p001",
+    "name": "Sofa Nordic 3 chỗ",
+    "collection": "Scandinavian Collection",
+    "category": "sofa",
+    "basePrice": 12500000,
+    "colors": [
+      { "id": "c1", "name": "Be sáng", "hex": "#c8c0a8" },
+      { "id": "c2", "name": "Xám trầm", "hex": "#6b6762" },
+      { "id": "c3", "name": "Nâu tối", "hex": "#3d3330" },
+      { "id": "c4", "name": "Navy", "hex": "#1f2937" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Vải lanh", "surcharge": 0 },
+      { "id": "m2", "name": "Da tổng hợp", "surcharge": 500000 },
+      { "id": "m3", "name": "Nhung cao cấp", "surcharge": 1200000 }
+    ],
+    "dimensions": { "w": 230, "d": 90, "h": 85 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/glTF-Binary/SheenWoodLeatherSofa.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["nordic", "minimalist", "living-room", "sofa"],
+    "rating": 4.8,
+    "reviewCount": 124,
+    "inStock": true
+  },
+  {
+    "id": "p002",
+    "name": "Ghế Eames Lounge",
+    "collection": "Classic Icons",
+    "category": "chair",
+    "basePrice": 4200000,
+    "colors": [
+      { "id": "c1", "name": "Be da", "hex": "#c9a882" },
+      { "id": "c2", "name": "Đen da", "hex": "#1c1c1c" },
+      { "id": "c3", "name": "Cognac", "hex": "#8b4513" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Da thật", "surcharge": 0 },
+      { "id": "m2", "name": "Da Italy cao cấp", "surcharge": 800000 }
+    ],
+    "dimensions": { "w": 83, "d": 84, "h": 85 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/glTF-Binary/SheenChair.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["classic", "leather", "lounge", "chair"],
+    "rating": 4.9,
+    "reviewCount": 89,
+    "inStock": true
+  },
+  {
+    "id": "p003",
+    "name": "Bàn gỗ óc chó tự nhiên",
+    "collection": "Walnut Series",
+    "category": "table",
+    "basePrice": 8900000,
+    "colors": [
+      { "id": "c1", "name": "Óc chó tự nhiên", "hex": "#5c3d1e" },
+      { "id": "c2", "name": "Óc chó đậm", "hex": "#3b2409" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Gỗ nguyên khối", "surcharge": 0 },
+      { "id": "m2", "name": "Gỗ ghép dày", "surcharge": -500000 }
+    ],
+    "dimensions": { "w": 180, "d": 90, "h": 75 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["wood", "dining", "natural", "table"],
+    "rating": 4.7,
+    "reviewCount": 56,
+    "inStock": true
+  },
+  {
+    "id": "p004",
+    "name": "Kệ sách Modular 5 tầng",
+    "collection": "Modular Living",
+    "category": "shelf",
+    "basePrice": 3600000,
+    "colors": [
+      { "id": "c1", "name": "Trắng sữa", "hex": "#f5f0e8" },
+      { "id": "c2", "name": "Đen mờ", "hex": "#1a1a1a" },
+      { "id": "c3", "name": "Tần bì tự nhiên", "hex": "#b5956a" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "MDF cao cấp", "surcharge": 0 },
+      { "id": "m2", "name": "Gỗ tần bì thật", "surcharge": 900000 }
+    ],
+    "dimensions": { "w": 80, "d": 30, "h": 180 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/screenshot/screenshot.png"
+    ],
+    "arSupported": true,
+    "tags": ["storage", "modular", "bookshelf", "shelf"],
+    "rating": 4.5,
+    "reviewCount": 201,
+    "inStock": true
+  },
+  {
+    "id": "p005",
+    "name": "Đèn sàn Arc Brass",
+    "collection": "Lighting Edit",
+    "category": "lamp",
+    "basePrice": 2800000,
+    "colors": [
+      { "id": "c1", "name": "Vàng đồng", "hex": "#b5860d" },
+      { "id": "c2", "name": "Chrome", "hex": "#aaaaaa" },
+      { "id": "c3", "name": "Đen mờ", "hex": "#1a1a1a" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Kim loại mạ", "surcharge": 0 },
+      { "id": "m2", "name": "Đồng nguyên chất", "surcharge": 600000 }
+    ],
+    "dimensions": { "w": 35, "d": 35, "h": 185 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnisotropyBarnLamp/glTF-Binary/AnisotropyBarnLamp.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnisotropyBarnLamp/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["lighting", "arc", "brass", "lamp"],
+    "rating": 4.6,
+    "reviewCount": 43,
+    "inStock": false
+  },
+  {
+    "id": "p006",
+    "name": "Ghế bành Wabi Sabi",
+    "collection": "Japandi Series",
+    "category": "chair",
+    "basePrice": 5400000,
+    "colors": [
+      { "id": "c1", "name": "Xanh bạc hà", "hex": "#8aaea6" },
+      { "id": "c2", "name": "Cát sa mạc", "hex": "#c8b89a" },
+      { "id": "c3", "name": "Đất sét", "hex": "#a0735a" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Vải bông hữu cơ", "surcharge": 0 },
+      { "id": "m2", "name": "Tweed Nhật Bản", "surcharge": 700000 }
+    ],
+    "dimensions": { "w": 78, "d": 80, "h": 76 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SpecularSilkPouf/glTF-Binary/SpecularSilkPouf.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SpecularSilkPouf/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["japandi", "organic", "accent-chair"],
+    "rating": 4.8,
+    "reviewCount": 67,
+    "inStock": true
+  },
+  {
+    "id": "p007",
+    "name": "Pouf tròn Silka",
+    "collection": "Soft Forms",
+    "category": "other",
+    "basePrice": 2190000,
+    "colors": [
+      { "id": "c1", "name": "Ivory", "hex": "#e0d2bf" },
+      { "id": "c2", "name": "Sage", "hex": "#8f9d88" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Lụa dệt", "surcharge": 0 },
+      { "id": "m2", "name": "Boucle mềm", "surcharge": 300000 }
+    ],
+    "dimensions": { "w": 58, "d": 58, "h": 42 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SpecularSilkPouf/glTF-Binary/SpecularSilkPouf.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SpecularSilkPouf/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["pouf", "ottoman", "lounge"],
+    "rating": 4.4,
+    "reviewCount": 37,
+    "inStock": true
+  },
+  {
+    "id": "p008",
+    "name": "Sofa Havn Leather",
+    "collection": "Nordic Leather",
+    "category": "sofa",
+    "basePrice": 15600000,
+    "colors": [
+      { "id": "c1", "name": "Cognac", "hex": "#9f6041" },
+      { "id": "c2", "name": "Ink Black", "hex": "#1f1c19" }
+    ],
+    "materials": [
+      { "id": "m1", "name": "Da cognac", "surcharge": 0 },
+      { "id": "m2", "name": "Da full-grain", "surcharge": 1800000 }
+    ],
+    "dimensions": { "w": 206, "d": 88, "h": 78 },
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/glTF-Binary/SheenWoodLeatherSofa.glb",
+    "images": [
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/screenshot/screenshot.jpg"
+    ],
+    "arSupported": true,
+    "tags": ["leather", "sofa", "premium"],
+    "rating": 4.9,
+    "reviewCount": 71,
+    "inStock": true
+  }
+]
