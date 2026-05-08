@@ -1,5 +1,5 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
-import { AppShell } from "./components/layout/AppShell";
+import { Layout } from "./components/layout/Layout";
 import { ARPage } from "./pages/ARPage";
 import { CartPage } from "./pages/CartPage";
 import { CatalogPage } from "./pages/CatalogPage";
@@ -10,24 +10,25 @@ import { OrderSuccessPage } from "./pages/OrderSuccessPage";
 import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { WishlistPage } from "./pages/WishlistPage";
+import { ROUTES } from "./constants/routes";
 
 export const router = createBrowserRouter([
-  { element: <LandingPage />, path: "/" },
-  { element: <LoginPage />, path: "/login" },
-  { element: <RegisterPage />, path: "/register" },
+  { element: <LandingPage />, path: ROUTES.HOME },
+  { element: <LoginPage />, path: ROUTES.LOGIN },
+  { element: <RegisterPage />, path: ROUTES.REGISTER },
   {
-    element: <AppShell />,
+    element: <Layout />,
     children: [
-      { element: <CatalogPage />, path: "/catalog" },
-      { element: <Navigate replace to="/catalog" />, path: "/products" },
-      { element: <ProductDetailPage />, path: "/products/:id" },
-      { element: <ARPage />, path: "/ar/:id" },
-      { element: <Navigate replace to="/ar/p001" />, path: "/try" },
-      { element: <CartPage />, path: "/cart" },
-      { element: <CheckoutPage />, path: "/checkout" },
-      { element: <WishlistPage />, path: "/wishlist" },
+      { element: <CatalogPage />, path: ROUTES.CATALOG },
+      { element: <Navigate replace to={ROUTES.CATALOG} />, path: ROUTES.PRODUCTS },
+      { element: <ProductDetailPage />, path: ROUTES.PRODUCT },
+      { element: <ARPage />, path: ROUTES.AR },
+      { element: <Navigate replace to="/ar/p001" />, path: ROUTES.TRY },
+      { element: <CartPage />, path: ROUTES.CART },
+      { element: <CheckoutPage />, path: ROUTES.CHECKOUT },
+      { element: <WishlistPage />, path: ROUTES.WISHLIST },
     ],
   },
-  { element: <OrderSuccessPage />, path: "/order-success/:orderId" },
-  { element: <Navigate replace to="/" />, path: "*" },
+  { element: <OrderSuccessPage />, path: ROUTES.ORDER_SUCCESS },
+  { element: <Navigate replace to={ROUTES.HOME} />, path: "*" },
 ]);

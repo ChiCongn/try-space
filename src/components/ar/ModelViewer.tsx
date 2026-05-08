@@ -133,7 +133,9 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
           poster={poster}
           alt={alt}
           ar
-          ar-modes="webxr scene-viewer quick-look"
+          ar-modes="scene-viewer webxr quick-look"
+          ar-placement="floor"
+          ar-scale="fixed"
           camera-controls
           auto-rotate
           shadow-intensity="0.85"

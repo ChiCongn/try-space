@@ -9,6 +9,8 @@ type ModelViewerElementAttributes = DetailedHTMLProps<
   alt?: string;
   ar?: boolean;
   "ar-modes"?: string;
+  "ar-placement"?: "floor" | "wall";
+  "ar-scale"?: "auto" | "fixed";
   "camera-controls"?: boolean;
   "auto-rotate"?: boolean;
   "shadow-intensity"?: string;

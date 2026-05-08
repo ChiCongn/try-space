@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { formatVnd } from "../shared/lib/money";
-import { useCartStore } from "../stores/cartStore";
+import { formatVnd } from "../utils/formatPrice";
+import { useCartStore } from "../store/cartStore";
 
 export function CartPage() {
   const items = useCartStore((state) => state.items);

@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Heart, House, ScanLine, ShoppingBag } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useCartStore } from "../../stores/cartStore";
+import { useCartStore } from "../../store/cartStore";
 
 const navItems = [
   { to: "/", icon: House, label: "Trang chủ" },
@@ -10,7 +10,7 @@ const navItems = [
   { to: "/cart", icon: ShoppingBag, label: "Giỏ" },
 ] as const;
 
-export function BottomNav() {
+export function MobileNav() {
   const itemCount = useCartStore((state) => state.itemCount());
   const { pathname } = useLocation();
 

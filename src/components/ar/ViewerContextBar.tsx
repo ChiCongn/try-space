@@ -1,4 +1,4 @@
-import type { ProductVariant, RoomPreset } from "../../products/types";
+import type { ProductVariant, RoomPreset } from "../../types/product.types";
 
 type ViewerContextBarProps = {
   canActivateAR: boolean;

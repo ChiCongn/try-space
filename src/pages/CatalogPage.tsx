@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { productsApi, type ProductFilters } from "../api/products.api";
+import { productApi, type ProductFilters } from "../services/product.api";
 import { ProductCard } from "../components/product/ProductCard";
 import type { Product } from "../types";
 
@@ -52,15 +52,22 @@ export function CatalogPage() {
 
   useEffect(() => {
     let isMounted = true;
-    setIsLoading(true);
-    productsApi
-      .getAll(filters)
-      .then((response) => {
+
+    async function loadProducts() {
+      await Promise.resolve();
+      if (!isMounted) return;
+
+      setIsLoading(true);
+      try {
+        const response = await productApi.getAll(filters);
         if (isMounted) setProducts(response.data);
-      })
-      .finally(() => {
+      } finally {
         if (isMounted) setIsLoading(false);
-      });
+      }
+    }
+
+    void loadProducts();
+
     return () => {
       isMounted = false;
     };

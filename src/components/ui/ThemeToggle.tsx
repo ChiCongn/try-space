@@ -1,6 +1,6 @@
 import { Moon, Sun } from "lucide-react";
 import { motion } from "framer-motion";
-import { useThemeStore } from "../../stores/themeStore";
+import { useThemeStore } from "../../store/themeStore";
 
 export function ThemeToggle() {
   const theme = useThemeStore((state) => state.theme);

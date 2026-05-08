@@ -14,11 +14,11 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { productsApi } from "../api/products.api";
-import { ModelViewer } from "../features/ar/components/ModelViewer";
-import { formatVnd } from "../shared/lib/money";
-import { useCartStore } from "../stores/cartStore";
-import { useWishlistStore } from "../stores/wishlistStore";
+import { ModelViewer } from "../components/ar/ModelViewer";
+import { productApi } from "../services/product.api";
+import { formatVnd } from "../utils/formatPrice";
+import { useCartStore } from "../store/cartStore";
+import { useWishlistStore } from "../store/wishlistStore";
 import type { Product, ProductColor, ProductMaterial } from "../types";
 
 const stagger = {
@@ -62,22 +62,28 @@ export function ProductDetailPage() {
   useEffect(() => {
     if (!id) return;
     let live = true;
-    setIsLoading(true);
-    productsApi
-      .getById(id)
-      .then((res) => {
+
+    async function loadProduct(productId: string) {
+      await Promise.resolve();
+      if (!live) return;
+
+      setIsLoading(true);
+      try {
+        const res = await productApi.getById(productId);
         if (!live) return;
         setProduct(res.data);
         setSelectedColor(res.data.colors[0]);
         setSelectedMaterial(res.data.materials[0]);
         setActiveImg(0);
-      })
-      .catch(() => {
+      } catch {
         if (live) setProduct(null);
-      })
-      .finally(() => {
+      } finally {
         if (live) setIsLoading(false);
-      });
+      }
+    }
+
+    void loadProduct(id);
+
     return () => {
       live = false;
     };

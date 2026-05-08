@@ -2,10 +2,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Minus, Plus, X } from "lucide-react";
 import { toast } from "sonner";
-import { formatVnd } from "../../shared/lib/money";
-import { useCartStore } from "../../stores/cartStore";
+import { formatVnd } from "../../utils/formatPrice";
+import { useCartStore } from "../../store/cartStore";
 
-export function CartDrawer() {
+export function CartSheet() {
   const isOpen = useCartStore((state) => state.isOpen);
   const items = useCartStore((state) => state.items);
   const closeCart = useCartStore((state) => state.closeCart);

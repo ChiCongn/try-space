@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
-import { authApi } from "../api/auth.api";
-import { useAuthStore } from "../stores/authStore";
+import { authApi } from "../services/auth.api";
+import { useAuthStore } from "../store/authStore";
 import type { RegisterPayload } from "../types";
 
 type RegisterForm = RegisterPayload & { confirmPassword: string };

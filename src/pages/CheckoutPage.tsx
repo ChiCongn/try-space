@@ -3,9 +3,9 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
-import { orderApi } from "../api/order.api";
-import { formatVnd } from "../shared/lib/money";
-import { useCartStore } from "../stores/cartStore";
+import { orderApi } from "../services/order.api";
+import { formatVnd } from "../utils/formatPrice";
+import { useCartStore } from "../store/cartStore";
 import type { Address, CreateOrderPayload } from "../types";
 
 const addressSchema = z.object({

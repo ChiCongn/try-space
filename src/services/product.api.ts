@@ -1,4 +1,4 @@
-import { apiClient, mockDelay, useMockApi } from "./client";
+import { apiClient, mockDelay, useMockApi } from "./api";
 import type { ApiResponse, Product } from "../types";
 import mockProducts from "../assets/mock-data/products.json";
 
@@ -18,7 +18,7 @@ function normalize(value: string) {
   return value.trim().toLowerCase();
 }
 
-export const productsApi = {
+export const productApi = {
   async getAll(filters: ProductFilters = {}): Promise<ApiResponse<Product[]>> {
     if (useMockApi) {
       await mockDelay();

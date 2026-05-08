@@ -1,4 +1,4 @@
-import { apiClient, mockDelay, useMockApi } from "./client";
+import { apiClient, mockDelay, useMockApi } from "./api";
 import type { ApiResponse, CartItem } from "../types";
 
 export const cartApi = {

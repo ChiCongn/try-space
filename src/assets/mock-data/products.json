@@ -68,9 +68,9 @@
       { "id": "m2", "name": "Gỗ ghép dày", "surcharge": -500000 }
     ],
     "dimensions": { "w": 180, "d": 90, "h": 75 },
-    "modelUrl": "/public/models/wooden_table_set-1k.glb",
+    "modelUrl": "/models/wooden_table_set-1k.glb",
     "images": [
-      "/public/models/wooden-table-set.png"
+      "/models/wooden-table-set.png"
     ],
     "arSupported": true,
     "tags": ["wood", "dining", "natural", "table"],
@@ -96,7 +96,7 @@
     "dimensions": { "w": 80, "d": 30, "h": 180 },
     "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb",
     "images": [
-      "/src/assets/models/wooden-table-set.png"
+      "/models/wooden-table-set.png"
     ],
     "arSupported": true,
     "tags": ["storage", "modular", "bookshelf", "shelf"],

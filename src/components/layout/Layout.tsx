@@ -1,17 +1,17 @@
 import { Outlet } from "react-router-dom";
-import { BottomNav } from "./BottomNav";
-import { CartDrawer } from "./CartDrawer";
+import { CartSheet } from "../cart/CartSheet";
 import { Header } from "./Header";
+import { MobileNav } from "./MobileNav";
 
-export function AppShell() {
+export function Layout() {
   return (
     <div className="app-shell">
       <Header />
       <main className="shell-main">
         <Outlet />
       </main>
-      <BottomNav />
-      <CartDrawer />
+      <MobileNav />
+      <CartSheet />
     </div>
   );
 }

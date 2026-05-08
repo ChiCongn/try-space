@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { ProductCard } from "../components/product/ProductCard";
-import { useAuthStore } from "../stores/authStore";
-import { useWishlistStore } from "../stores/wishlistStore";
+import { useAuthStore } from "../store/authStore";
+import { useWishlistStore } from "../store/wishlistStore";
 
 export function WishlistPage() {
   const user = useAuthStore((state) => state.user);

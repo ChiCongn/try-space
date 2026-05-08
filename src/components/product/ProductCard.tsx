@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { Heart, ShoppingBag, Scan } from "lucide-react";
-import { Link } from "react-router-dom";
-import { formatVnd } from "../../shared/lib/money";
-import { useCartStore } from "../../stores/cartStore";
-import { useWishlistStore } from "../../stores/wishlistStore";
+import { Link, useNavigate } from "react-router-dom";
+import { formatVnd } from "../../utils/formatPrice";
+import { useCartStore } from "../../store/cartStore";
+import { useWishlistStore } from "../../store/wishlistStore";
 import type { Product } from "../../types";
 
 interface ProductCardProps {
@@ -11,6 +11,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate();
   const addItem = useCartStore((state) => state.addItem);
   const isInCart = useCartStore((state) =>
     state.items.some((item) => item.product.id === product.id),
@@ -50,10 +51,20 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* AR badge — bottom-left corner */}
         {product.arSupported && (
-          <span className="pcard__ar-badge">
+          <button
+            aria-label={`Thử AR ${product.name}`}
+            className="pcard__ar-badge"
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              navigate(
+                `/ar/${product.id}?color=${firstColor.id}&material=${firstMaterial.id}`,
+              );
+            }}
+          >
             <Scan size={11} strokeWidth={2.5} />
             AR
-          </span>
+          </button>
         )}
       </Link>
 

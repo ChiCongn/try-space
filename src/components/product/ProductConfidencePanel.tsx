@@ -1,4 +1,8 @@
-import type { Product, ProductVariant, RoomPreset } from "../types";
+import type {
+  Product,
+  ProductVariant,
+  RoomPreset,
+} from "../../types/product.types";
 
 type ProductConfidencePanelProps = {
   product: Product;

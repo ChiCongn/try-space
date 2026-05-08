@@ -5,3 +5,5 @@ export function formatVnd(value: number) {
     maximumFractionDigits: 0,
   }).format(value);
 }
+
+export const formatPrice = formatVnd;

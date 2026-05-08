@@ -1,5 +1,5 @@
-import type { ProductVariant } from "../types";
-import { formatVnd } from "../../../shared/lib/money";
+import type { ProductVariant } from "../../types/product.types";
+import { formatVnd } from "../../utils/formatPrice";
 
 type VariantSelectorProps = {
   variants: ProductVariant[];

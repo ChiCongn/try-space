@@ -9,8 +9,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { ThemeToggle } from "../ui";
-import { useAuthStore } from "../../stores/authStore";
-import { useCartStore } from "../../stores/cartStore";
+import { useAuthStore } from "../../store/authStore";
+import { useCartStore } from "../../store/cartStore";
 
 export function Header() {
   const itemCount = useCartStore((state) => state.itemCount());
@@ -24,8 +24,9 @@ export function Header() {
 
   // Close user menu on route change
   useEffect(() => {
-    setUserMenuOpen(false);
-  }, [location]);
+    const timeoutId = window.setTimeout(() => setUserMenuOpen(false), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [location.pathname]);
 
   // Shadow/border on scroll
   useEffect(() => {

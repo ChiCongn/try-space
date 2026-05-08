@@ -1,4 +1,4 @@
-import type { RoomPreset } from "../types";
+import type { RoomPreset } from "../../types/product.types";
 
 type RoomPresetSelectorProps = {
   presets: RoomPreset[];
