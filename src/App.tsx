@@ -9,7 +9,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 function App() {
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster closeButton position="top-right" richColors />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />

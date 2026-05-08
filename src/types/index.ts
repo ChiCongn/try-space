@@ -77,3 +77,38 @@ export interface RegisterPayload {
   email: string;
   password: string;
 }
+
+export type PaymentMethod = "cod" | "banking" | "momo";
+
+export type OrderStatus = "pending" | "confirmed" | "shipping" | "delivered" | "cancelled";
+
+export interface Address {
+  recipientName: string;
+  recipientPhone: string;
+  province: string;
+  district: string;
+  ward: string;
+  street: string;
+  notes?: string;
+}
+
+export interface Order {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  shippingAddress: Address;
+  paymentMethod: PaymentMethod;
+  status: OrderStatus;
+  subtotal: number;
+  shippingFee: number;
+  total: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateOrderPayload {
+  items: CartItem[];
+  shippingAddress: Address;
+  paymentMethod: PaymentMethod;
+  notes?: string;
+}

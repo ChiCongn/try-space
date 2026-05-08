@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { z } from "zod";
 import { authApi } from "../api/auth.api";
 import { useAuthStore } from "../stores/authStore";
@@ -39,7 +40,11 @@ export function RegisterPage() {
     const parsed = schema.safeParse(data);
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ");
+      const message = parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ";
+      setError(message);
+      toast.error("Không thể đăng ký", {
+        description: message,
+      });
       return;
     }
 
@@ -56,12 +61,16 @@ export function RegisterPage() {
         response.data.tokens.accessToken,
         response.data.tokens.refreshToken,
       );
+      toast.success("Tạo tài khoản thành công");
       navigate("/");
     } catch (caught) {
       const message =
         (caught as { response?: { data?: { message?: string } } }).response
           ?.data?.message ?? "Đăng ký thất bại";
       setError(message);
+      toast.error("Không thể đăng ký", {
+        description: message,
+      });
     } finally {
       setIsLoading(false);
     }

@@ -1,11 +1,9 @@
-import { ArrowLeft, Move, Plus, RotateCw, ShoppingBag, Trash2 } from "lucide-react";
+import { ArrowLeft, Move, Plus, RotateCw, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { productsApi } from "../api/products.api";
 import { ModelViewer } from "../features/ar/components/ModelViewer";
 import { useARSupport } from "../hooks/useARSupport";
-import { formatVnd } from "../shared/lib/money";
-import { useCartStore } from "../stores/cartStore";
 import type { Product } from "../types";
 
 export function ARPage() {
@@ -15,7 +13,6 @@ export function ARPage() {
   const arSupport = useARSupport();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
     if (arSupport.useDesktopViewer && id) {
@@ -78,8 +75,6 @@ export function ARPage() {
     return <div className="ar-page">Không tìm thấy sản phẩm.</div>;
   }
 
-  const finalPrice = product.basePrice + selectedMaterial.surcharge;
-
   return (
     <section className="ar-page">
       <div className="ar-topbar">
@@ -124,28 +119,6 @@ export function ARPage() {
           <Trash2 size={18} />
         </button>
       </div>
-
-      <aside className="ar-bottom-sheet">
-        <div>
-          <span>{product.name} · {selectedColor.name}</span>
-          <strong>{formatVnd(finalPrice)}</strong>
-        </div>
-        <div className="swatch-row">
-          {product.colors.map((color) => (
-            <span
-              key={color.id}
-              style={{ backgroundColor: color.hex }}
-              aria-label={color.name}
-            />
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={() => addItem(product, selectedColor, selectedMaterial)}
-        >
-          <ShoppingBag size={17} /> Thêm vào giỏ
-        </button>
-      </aside>
     </section>
   );
 }

@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
-  Search,
   ShoppingBag,
   UserRound,
   LogOut,

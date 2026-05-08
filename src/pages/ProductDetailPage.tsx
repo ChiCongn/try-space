@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { productsApi } from "../api/products.api";
 import { ModelViewer } from "../features/ar/components/ModelViewer";
 import { formatVnd } from "../shared/lib/money";
@@ -51,7 +52,6 @@ export function ProductDetailPage() {
     useState<ProductMaterial | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [added, setAdded] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
 
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
@@ -89,26 +89,60 @@ export function ProductDetailPage() {
   }, [product, selectedMaterial]);
 
   function handleAddToCart() {
-    if (!product || !selectedColor || !selectedMaterial) return;
+    if (!product || !selectedColor || !selectedMaterial) {
+      toast.error("Chưa thể thêm vào giỏ", {
+        description: "Vui lòng chọn đầy đủ màu sắc và vật liệu.",
+      });
+      return;
+    }
+
+    if (!product.inStock) {
+      toast.warning("Sản phẩm đang hết hàng");
+      return;
+    }
+
     addItem(product, selectedColor, selectedMaterial);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+    toast.success("Đã thêm vào giỏ hàng", {
+      description: product.name,
+    });
   }
 
   function saveDesign() {
-    if (!product || !selectedColor || !selectedMaterial) return;
+    if (!product || !selectedColor || !selectedMaterial) {
+      toast.error("Chưa thể lưu thiết kế", {
+        description: "Vui lòng chọn đầy đủ màu sắc và vật liệu.",
+      });
+      return;
+    }
+
     const hash = `design_${Date.now().toString(36)}`;
-    localStorage.setItem(
-      `tryspace-design-${hash}`,
-      JSON.stringify({
-        hash,
-        productId: product.id,
-        selectedColor,
-        selectedMaterial,
-      }),
-    );
-    setToast(`Đã lưu thiết kế`);
-    setTimeout(() => setToast(null), 3000);
+    try {
+      localStorage.setItem(
+        `tryspace-design-${hash}`,
+        JSON.stringify({
+          hash,
+          productId: product.id,
+          selectedColor,
+          selectedMaterial,
+        }),
+      );
+      toast.success("Đã lưu thiết kế");
+    } catch {
+      toast.error("Không thể lưu thiết kế", {
+        description: "Trình duyệt không cho phép lưu dữ liệu lúc này.",
+      });
+    }
+  }
+
+  function handleToggleWishlist() {
+    if (!product) return;
+
+    toggleWishlist(product);
+    toast.success(isWished ? "Đã bỏ khỏi yêu thích" : "Đã thêm vào yêu thích", {
+      description: product.name,
+    });
   }
 
   /* ── Loading ── */
@@ -427,7 +461,7 @@ export function ProductDetailPage() {
               aria-pressed={isWished}
               className={`pdp__icon-btn ${isWished ? "pdp__icon-btn--wished" : ""}`}
               type="button"
-              onClick={() => toggleWishlist(product)}
+              onClick={handleToggleWishlist}
             >
               <Heart size={18} fill={isWished ? "currentColor" : "none"} />
             </button>
@@ -496,21 +530,6 @@ export function ProductDetailPage() {
                 />
               </div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Toast ── */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            className="pdp__toast"
-            exit={{ opacity: 0, y: 12 }}
-            initial={{ opacity: 0, y: 12 }}
-          >
-            <Check size={14} strokeWidth={2.5} />
-            {toast}
           </motion.div>
         )}
       </AnimatePresence>

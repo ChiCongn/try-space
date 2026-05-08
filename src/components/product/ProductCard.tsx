@@ -12,6 +12,9 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const isInCart = useCartStore((state) =>
+    state.items.some((item) => item.product.id === product.id),
+  );
   const toggleWishlist = useWishlistStore((state) => state.toggle);
   const isWished = useWishlistStore((state) => state.isWished(product.id));
 
@@ -96,14 +99,17 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           <motion.button
-            aria-label="Thêm vào giỏ hàng"
-            className="pcard__cart-btn"
+            aria-label={
+              isInCart ? "Sản phẩm đã có trong giỏ hàng" : "Thêm vào giỏ hàng"
+            }
+            aria-pressed={isInCart}
+            className={`pcard__cart-btn ${isInCart ? "pcard__cart-btn--selected" : ""}`}
             type="button"
             whileTap={{ scale: 0.92 }}
             onClick={() => addItem(product, firstColor, firstMaterial)}
           >
             <ShoppingBag size={15} strokeWidth={2} />
-            <span>Thêm</span>
+            <span>{isInCart ? "Đã thêm" : "Thêm"}</span>
           </motion.button>
         </div>
       </div>

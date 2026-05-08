@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { formatVnd } from "../shared/lib/money";
 import { useCartStore } from "../stores/cartStore";
 
@@ -8,6 +9,32 @@ export function CartPage() {
   const total = useCartStore((state) => state.total());
   const updateQty = useCartStore((state) => state.updateQty);
   const removeItem = useCartStore((state) => state.removeItem);
+
+  const handleRemoveItem = (id: string, productName: string) => {
+    removeItem(id);
+    toast.success("Đã xóa sản phẩm", {
+      description: productName,
+    });
+  };
+
+  const handleDecreaseQty = (id: string, quantity: number, productName: string) => {
+    if (quantity <= 1) {
+      removeItem(id);
+      toast.info("Sản phẩm đã được xóa khỏi giỏ", {
+        description: productName,
+      });
+      return;
+    }
+
+    updateQty(id, quantity - 1);
+  };
+
+  const handleIncreaseQty = (id: string, quantity: number, productName: string) => {
+    updateQty(id, quantity + 1);
+    toast.success("Đã cập nhật số lượng", {
+      description: productName,
+    });
+  };
 
   return (
     <section className="cart-page">
@@ -32,18 +59,33 @@ export function CartPage() {
                 <div className="qty-controls">
                   <button
                     type="button"
-                    onClick={() => updateQty(item.id, item.quantity - 1)}
+                    onClick={() =>
+                      handleDecreaseQty(
+                        item.id,
+                        item.quantity,
+                        item.product.name,
+                      )
+                    }
                   >
                     <Minus size={15} />
                   </button>
                   <span>{item.quantity}</span>
                   <button
                     type="button"
-                    onClick={() => updateQty(item.id, item.quantity + 1)}
+                    onClick={() =>
+                      handleIncreaseQty(
+                        item.id,
+                        item.quantity,
+                        item.product.name,
+                      )
+                    }
                   >
                     <Plus size={15} />
                   </button>
-                  <button type="button" onClick={() => removeItem(item.id)}>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem(item.id, item.product.name)}
+                  >
                     <Trash2 size={15} />
                   </button>
                 </div>
@@ -67,9 +109,9 @@ export function CartPage() {
                 <dd>{formatVnd(total)}</dd>
               </div>
             </dl>
-            <button className="primary-link" type="button">
+            <Link className="primary-link" to="/checkout">
               Tiến hành đặt hàng
-            </button>
+            </Link>
             <Link className="ghost-link" to="/catalog">
               Tiếp tục mua sắm
             </Link>

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Minus, Plus, X } from "lucide-react";
+import { toast } from "sonner";
 import { formatVnd } from "../../shared/lib/money";
 import { useCartStore } from "../../stores/cartStore";
 
@@ -11,6 +12,25 @@ export function CartDrawer() {
   const updateQty = useCartStore((state) => state.updateQty);
   const removeItem = useCartStore((state) => state.removeItem);
   const total = useCartStore((state) => state.total());
+
+  const handleDecreaseQty = (id: string, quantity: number, productName: string) => {
+    if (quantity <= 1) {
+      removeItem(id);
+      toast.info("Sản phẩm đã được xóa khỏi giỏ", {
+        description: productName,
+      });
+      return;
+    }
+
+    updateQty(id, quantity - 1);
+  };
+
+  const handleRemoveItem = (id: string, productName: string) => {
+    removeItem(id);
+    toast.success("Đã xóa sản phẩm", {
+      description: productName,
+    });
+  };
 
   return (
     <AnimatePresence>
@@ -50,7 +70,13 @@ export function CartDrawer() {
                     <div className="qty-controls">
                       <button
                         type="button"
-                        onClick={() => updateQty(item.id, item.quantity - 1)}
+                        onClick={() =>
+                          handleDecreaseQty(
+                            item.id,
+                            item.quantity,
+                            item.product.name,
+                          )
+                        }
                         aria-label="Giảm số lượng"
                       >
                         <Minus size={14} />
@@ -58,14 +84,21 @@ export function CartDrawer() {
                       <span>{item.quantity}</span>
                       <button
                         type="button"
-                        onClick={() => updateQty(item.id, item.quantity + 1)}
+                        onClick={() => {
+                          updateQty(item.id, item.quantity + 1);
+                          toast.success("Đã cập nhật số lượng", {
+                            description: item.product.name,
+                          });
+                        }}
                         aria-label="Tăng số lượng"
                       >
                         <Plus size={14} />
                       </button>
                       <button
                         type="button"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() =>
+                          handleRemoveItem(item.id, item.product.name)
+                        }
                         aria-label="Xóa sản phẩm"
                       >
                         <X size={14} />
