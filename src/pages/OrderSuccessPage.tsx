@@ -33,9 +33,6 @@ export function OrderSuccessPage() {
           <Link className="primary-link" to="/catalog">
             Tiếp tục mua sắm
           </Link>
-          <Link className="ghost-link" to="/">
-            Về trang chủ
-          </Link>
         </div>
       </div>
     </main>

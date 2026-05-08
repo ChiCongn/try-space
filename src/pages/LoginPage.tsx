@@ -26,7 +26,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/", { replace: true });
+      navigate("/catalog", { replace: true });
     }
   }, [isLoggedIn, navigate]);
 

@@ -32,7 +32,7 @@ export function OrderDetailPage() {
 
   return (
     <section className="simple-page">
-      <Link className="ghost-link" to="/orders"><ArrowLeft size={16} />Đơn hàng</Link>
+      <Link className="ghost-link" to="/orders"><ArrowLeft size={16} /></Link>
       <div className="page-heading compact">
         <span>{formatDateTime(order.createdAt)}</span>
         <h1>{order.id}</h1>

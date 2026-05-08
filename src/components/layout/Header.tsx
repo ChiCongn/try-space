@@ -7,7 +7,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "../ui";
 import { useAuthStore } from "../../store/authStore";
 import { useCartStore } from "../../store/cartStore";
@@ -60,7 +60,7 @@ export function Header() {
         TrySpace
       </Link>
 
-      {/* Desktop nav */}
+      {/* Desktop nav
       <nav className="hdr__nav" aria-label="Main navigation">
         <NavLink
           className={({ isActive }) =>
@@ -86,7 +86,7 @@ export function Header() {
         >
           Đơn hàng
         </NavLink>
-      </nav>
+      </nav> */}
 
       {/* Right tools */}
       <div className="hdr__tools">

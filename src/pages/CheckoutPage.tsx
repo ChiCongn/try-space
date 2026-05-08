@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -52,17 +52,17 @@ export function CheckoutPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<"cod">("cod");
-  const hasRedirectedEmptyCart = useRef(false);
+  //const hasRedirectedEmptyCart = useRef(false);
 
-  useEffect(() => {
-    if (items.length > 0 || hasRedirectedEmptyCart.current) return;
+//   useEffect(() => {
+//     if (items.length > 0 || hasRedirectedEmptyCart.current) return;
 
-    hasRedirectedEmptyCart.current = true;
-    toast.warning("Giỏ hàng đang trống", {
-      description: "Vui lòng chọn sản phẩm trước khi thanh toán.",
-    });
-    navigate("/cart", { replace: true });
-  }, [items.length, navigate]);
+//     hasRedirectedEmptyCart.current = true;
+//     toast.warning("Giỏ hàng đang trống", {
+//       description: "Vui lòng chọn sản phẩm trước khi thanh toán.",
+//     });
+//     navigate("/cart", { replace: true });
+//   }, [items.length, navigate]);
 
   const onSubmit = async (data: Address) => {
     clearErrors();

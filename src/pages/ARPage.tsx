@@ -1,9 +1,8 @@
-import { ArrowLeft, ScanLine, ShoppingBag, Smartphone } from "lucide-react";
+import { ArrowLeft, ScanLine, ShoppingBag } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ARControls } from "../components/ar/ARControls";
-import { ARFallback } from "../components/ar/ARFallback";
 import {
   ModelViewer,
   type ModelViewerArStatus,
@@ -22,12 +21,14 @@ import type { Product, ProductColor, ProductMaterial } from "../types";
 
 export function ARPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [searchParams] = useSearchParams();
   const arSupport = useARSupport();
   const modelViewerRef = useRef<ModelViewerHandle | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [canActivateAR, setCanActivateAR] = useState(false);
+  const [, setCanActivateAR] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState("");
   const [selectedMaterialId, setSelectedMaterialId] = useState("");
   const [modelStatus, setModelStatus] =
@@ -54,9 +55,13 @@ export function ARPage() {
       .then((response) => {
         if (isMounted) {
           setProduct(response.data);
-          setSelectedColorId(searchParams.get("color") ?? response.data.colors[0]?.id ?? "");
+          setSelectedColorId(
+            searchParams.get("color") ?? response.data.colors[0]?.id ?? "",
+          );
           setSelectedMaterialId(
-            searchParams.get("material") ?? response.data.materials[0]?.id ?? "",
+            searchParams.get("material") ??
+              response.data.materials[0]?.id ??
+              "",
           );
         }
       })
@@ -107,65 +112,6 @@ export function ARPage() {
       setArSelection(selectedColor, selectedMaterial);
     }
   }, [selectedColor, selectedMaterial, setArSelection]);
-
-  const arStatusMessage = useMemo(() => {
-    if (!product?.modelUrl) {
-      return "Sản phẩm này chưa có model 3D để mở AR.";
-    }
-
-    switch (arStatus) {
-      case "failed":
-        return "Không mở được AR. Bạn vẫn có thể xem sản phẩm bằng viewer 3D.";
-      case "not-presenting":
-        return "AR đã đóng. Có thể mở lại bất cứ lúc nào.";
-      case "object-placed":
-        return "Sản phẩm đã được đặt trong không gian của bạn.";
-      case "session-started":
-        return "Phiên AR đang mở. Quét mặt sàn chậm để đặt sản phẩm.";
-      case "idle":
-      default:
-        break;
-    }
-
-    if (modelStatus === "loading") {
-      return "Đang tải model 3D. Nút mở camera sẽ sẵn sàng sau khi model tải xong.";
-    }
-
-    if (modelStatus === "error") {
-      return "Không tải được model 3D nên chưa thể mở camera AR.";
-    }
-
-    if (canActivateAR) {
-      if (arSupport.sceneViewer) {
-        return "Sẵn sàng mở camera AR bằng Scene Viewer trên Android.";
-      }
-
-      if (arSupport.quickLook) {
-        return "Sẵn sàng mở camera AR bằng Quick Look trên iPhone/iPad.";
-      }
-
-      return "Thiết bị đã sẵn sàng mở camera AR.";
-    }
-
-    if (!arSupport.isMobile) {
-      return "Đang xem 3D. Mở trang này trên điện thoại để thử AR trong phòng.";
-    }
-
-    if (arSupport.webXR === null) {
-      return "Đang kiểm tra khả năng AR của thiết bị.";
-    }
-
-    return "Trình duyệt này chưa báo hỗ trợ AR native. Hãy thử Chrome trên Android hoặc Safari trên iPhone.";
-  }, [
-    arStatus,
-    arSupport.isMobile,
-    arSupport.quickLook,
-    arSupport.sceneViewer,
-    arSupport.webXR,
-    canActivateAR,
-    modelStatus,
-    product,
-  ]);
 
   async function handleStartAR() {
     if (!product?.modelUrl) {
@@ -266,63 +212,91 @@ export function ARPage() {
   }
 
   if (isLoading) {
-    return <div className="ar-page">Đang mở AR...</div>;
+    return (
+      <div className="ar-page-state">
+        <span>TrySpace AR</span>
+        <strong>Đang tải không gian thử sản phẩm...</strong>
+      </div>
+    );
   }
 
   if (!product || !selectedColor || !selectedMaterial) {
-    return <div className="ar-page">Không tìm thấy sản phẩm.</div>;
+    return (
+      <div className="ar-page-state">
+        <span>TrySpace AR</span>
+        <strong>Không tìm thấy sản phẩm.</strong>
+        <Link className="primary-link" to="/catalog">
+          Về catalog
+        </Link>
+      </div>
+    );
   }
 
   return (
     <section className="ar-page">
       <div className="ar-topbar">
-        <Link to={`/products/${product.id}`} aria-label="Quay lại">
-          <ArrowLeft size={20} />
-        </Link>
-        <span>
-          {canActivateAR ? "AR ready" : "3D preview"}
-        </span>
+        <button
+          aria-label="Quay lại"
+          className="pdp__back"
+          type="button"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={18} strokeWidth={2} />
+        </button>
       </div>
 
-      <div className="ar-viewfinder">
-        {product.modelUrl ? (
-          <ModelViewer
-            ref={modelViewerRef}
-            alt={`AR model của ${product.name}`}
-            onArAvailabilityChange={setCanActivateAR}
-            onArStatusChange={handleArStatusChange}
-            onLoadStatusChange={setModelStatus}
-            poster={product.images[0]}
-            selectedColor={selectedColor.hex}
-            src={product.modelUrl}
-          />
-        ) : (
-          <ThreeViewer color={selectedColor.hex} />
-        )}
-        {arStatus === "session-started" ? <PlaneDetector /> : null}
-      </div>
+      <section className="ar-stage" aria-label="Xem sản phẩm trong 3D">
+        <div className="ar-viewfinder">
+          {product.modelUrl ? (
+            <ModelViewer
+              ref={modelViewerRef}
+              alt={`AR model của ${product.name}`}
+              onArAvailabilityChange={setCanActivateAR}
+              onArStatusChange={handleArStatusChange}
+              onLoadStatusChange={setModelStatus}
+              poster={product.images[0]}
+              selectedColor={selectedColor.hex}
+              src={product.modelUrl}
+            />
+          ) : (
+            <ThreeViewer color={selectedColor.hex} />
+          )}
+          {arStatus === "session-started" ? <PlaneDetector /> : null}
+        </div>
+      </section>
 
       <aside className="ar-bottom-sheet" aria-label="Điều khiển AR">
+        <div className="ar-panel-title">
+          <span>Cấu hình sản phẩm</span>
+        </div>
+
         <div className="ar-bottom-sheet__header">
           <div>
-            <span>
-              {selectedColor.name} · {selectedMaterial.name}
-            </span>
+            <span>{product.collection}</span>
             <strong>{product.name}</strong>
+            <small>
+              {selectedColor.name} · {selectedMaterial.name}
+            </small>
           </div>
           <strong className="ar-bottom-sheet__price">
             {formatVnd(finalPrice)}
           </strong>
         </div>
 
-        <div className="ar-support-note" role="status">
-          <Smartphone size={16} />
-          <span>{arStatusMessage}</span>
+        <div className="ar-product-meta" aria-label="Thông số sản phẩm">
+          <div>
+            <span>Rộng</span>
+            <strong>{product.dimensions.w} cm</strong>
+          </div>
+          <div>
+            <span>Sâu</span>
+            <strong>{product.dimensions.d} cm</strong>
+          </div>
+          <div>
+            <span>Cao</span>
+            <strong>{product.dimensions.h} cm</strong>
+          </div>
         </div>
-
-        {!canActivateAR || !arSupport.any ? (
-          <ARFallback message={arStatusMessage} />
-        ) : null}
 
         <ARControls
           colors={product.colors}
@@ -346,7 +320,7 @@ export function ARPage() {
             onClick={handleStartAR}
           >
             <ScanLine size={18} />
-            {isLaunchingAR ? "Đang mở..." : "Mở camera AR"}
+            {isLaunchingAR ? "Đang mở..." : "Mở AR"}
           </button>
           <button type="button" onClick={handleAddToCart}>
             <ShoppingBag size={18} />

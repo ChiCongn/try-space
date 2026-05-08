@@ -13,7 +13,7 @@ interface ReviewFormProps {
 export function ReviewForm({ onCreated, productId }: ReviewFormProps) {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
   const [title, setTitle] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
