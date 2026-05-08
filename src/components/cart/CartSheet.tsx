@@ -57,7 +57,7 @@ export function CartSheet() {
 
             {items.length > 0 ? (
               <div className="drawer-items">
-                {items.slice(0, 3).map((item) => (
+                {items.map((item) => (
                   <article className="drawer-item" key={item.id}>
                     <img src={item.product.images[0]} alt="" />
                     <div>

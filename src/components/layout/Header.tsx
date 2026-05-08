@@ -74,9 +74,17 @@ export function Header() {
           className={({ isActive }) =>
             `hdr__nav-link ${isActive ? "hdr__nav-link--active" : ""}`
           }
-          to="/wishlist"
+          to="/designs"
         >
           Thiết kế của tôi
+        </NavLink>
+        <NavLink
+          className={({ isActive }) =>
+            `hdr__nav-link ${isActive ? "hdr__nav-link--active" : ""}`
+          }
+          to="/orders"
+        >
+          Đơn hàng
         </NavLink>
       </nav>
 
@@ -159,6 +167,10 @@ export function Header() {
                     <span>{user.email}</span>
                   </div>
                   <div className="hdr__user-menu-divider" />
+                  <Link className="hdr__user-menu-item" to="/account">
+                    <UserRound size={14} strokeWidth={2} />
+                    Tài khoản
+                  </Link>
                   <button
                     className="hdr__user-menu-item hdr__user-menu-item--danger"
                     type="button"

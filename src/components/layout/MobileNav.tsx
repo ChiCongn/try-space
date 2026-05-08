@@ -1,13 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Heart, House, ScanLine, ShoppingBag } from "lucide-react";
+import { Box, House, ScanLine, ShoppingBag, UserRound } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useCartStore } from "../../store/cartStore";
 
 const navItems = [
   { to: "/", icon: House, label: "Trang chủ" },
   { to: "/catalog", icon: Box, label: "Khám phá" },
-  { to: "/wishlist", icon: Heart, label: "Tôi" },
   { to: "/cart", icon: ShoppingBag, label: "Giỏ" },
+  { to: "/account", icon: UserRound, label: "Tài khoản" },
 ] as const;
 
 export function MobileNav() {

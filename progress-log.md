@@ -16,9 +16,9 @@ Quy uoc trang thai:
 
 - [~] MVP core "Kham pha -> Xem AR -> Tuy bien -> Luu -> Mua" da co duong di chinh: landing, catalog, product detail, AR page, cart, checkout mock.
 - [~] Kien truc dang la React + Vite + TypeScript + Zustand + mock API, nhung version va thu vien khac dac ta: React 19, React Router 7, Zustand 5, Tailwind 4 plugin; chua co TanStack React Query.
-- [~] AR da dung `@google/model-viewer`, co CTA mo AR tren dien thoai va fallback 3D, nhung chua co `arStore`, AR controls nang cao, save/share design session va screenshot.
-- [ ] PWA chua duoc cau hinh day du: chua co `vite-plugin-pwa`, `manifest.json`, service worker, icon PNG 192/512.
-- [ ] Review, Orders, Designs, Shared Design, Account va ProtectedRoute chua duoc trien khai.
+- [~] AR da dung `@google/model-viewer`, co CTA mo AR tren dien thoai, fallback 3D, `arStore`, AR controls va save/share design session; screenshot moi co helper, chua co UI thumbnail production.
+- [~] PWA da co `manifest.webmanifest`, service worker custom, standalone config va cache co ban; chua cai `vite-plugin-pwa` va chua co icon PNG 192/512.
+- [x] Review, Orders, Designs, Shared Design, Account va ProtectedRoute da duoc trien khai voi mock/local data.
 
 ## 1. Cau Truc Thu Muc
 
@@ -27,10 +27,10 @@ Quy uoc trang thai:
 - [~] Du lieu san pham mock nam tai `src/assets/mock-data/products.json`.
 - [x] Prototype cu trong `src/features/products` da duoc dua ra `docs/archive/features-products`; `src/features` khong con nam trong source app.
 - [ ] Chua dung dung cau truc `apps/web/` nhu dac ta.
-- [~] Da co `src/types/product.types.ts`; chua tach tiep `api.types.ts`, `user.types.ts`, `order.types.ts`, `design.types.ts`, `review.types.ts`, `cart.types.ts`; core app types van gom trong `src/types/index.ts`.
+- [x] Da co `src/types/product.types.ts` va cac file tach `api.types.ts`, `user.types.ts`, `order.types.ts`, `design.types.ts`, `review.types.ts`, `cart.types.ts`; core app types van re-export/giu trong `src/types/index.ts`.
 - [x] Co `src/constants/routes.ts` va `src/constants/queryKeys.ts`.
-- [~] Co `src/utils/formatPrice.ts` va `src/utils/ids.ts`; chua co `formatDate.ts`, `cn.ts`, `arUtils.ts`.
-- [~] Co nhom component `cart/`; chua co nhom component `review/`, `design/`, `auth/` theo dac ta.
+- [x] Co `src/utils/formatPrice.ts`, `src/utils/ids.ts`, `formatDate.ts`, `cn.ts`, `arUtils.ts`.
+- [x] Co nhom component `cart/`, `review/`, `design/`, `auth/` theo dac ta.
 
 ## 2. Routing & Pages
 
@@ -46,13 +46,13 @@ Quy uoc trang thai:
 - [x] Co route Wishlist: `/wishlist`.
 - [x] Co route Login/Register: `/login`, `/register`.
 - [x] Co route Order Success: `/order-success/:orderId`.
-- [~] Wildcard route da redirect ve `/`, nhung chua co `NotFoundPage` rieng.
-- [~] Auth routes hien khong co Layout, khop mot phan dac ta.
-- [ ] Chua co `ProtectedRoute`; cart/checkout/wishlist chua bat buoc dang nhap.
-- [ ] Chua co route `/orders`, `/orders/:id`.
-- [ ] Chua co route `/designs`, `/design/:shareToken`.
-- [ ] Chua co route `/account`.
-- [ ] Chua co lazy loading route pages voi `React.lazy` + `Suspense`.
+- [x] Wildcard route dung `NotFoundPage` rieng.
+- [x] Auth routes hien khong co Layout, khop dac ta.
+- [x] Co `ProtectedRoute`; cart/checkout/wishlist/orders/designs/account bat buoc dang nhap.
+- [x] Co route `/orders`, `/orders/:id`.
+- [x] Co route `/designs`, `/design/:shareToken`.
+- [x] Co route `/account`.
+- [x] Co lazy loading route pages voi `React.lazy` + `Suspense`.
 - [x] Da co va dang dung route constants `ROUTES`.
 
 ## 3. Page Specifications
@@ -61,7 +61,7 @@ Quy uoc trang thai:
 
 - [x] Co hero, CTA den catalog, CTA demo AR.
 - [x] Co section feature/how it works/CTA/footer.
-- [~] Chua co stats bar.
+- [x] Co stats bar.
 - [~] Chua fetch featured products 12 items tu API.
 - [~] CTA "Thu trong phong" hien di thang `/ar/p001`, chua vao ProductDetail voi AR tab active.
 
@@ -90,8 +90,8 @@ Quy uoc trang thai:
 - [~] Chua co tab system "3D View | AR Room | Photos".
 - [~] Model viewer chi lazy theo modal, chua lazy theo scroll/viewer section nhu spec.
 - [~] Sidebar/info panel co responsive CSS, can verify sticky behavior theo spec.
-- [ ] Chua co related products.
-- [ ] Chua co review list/form trong product detail.
+- [x] Co related products.
+- [x] Co review list/form trong product detail.
 
 ### ARPage
 
@@ -102,11 +102,11 @@ Quy uoc trang thai:
 - [x] Co trang thai ho tro AR/fallback 3D va toast loi.
 - [x] Co add to cart ngay tren AR bottom sheet.
 - [x] Co local model path hop le qua `/models/...`.
-- [~] Chua co UI dieu khien trong AR session sau khi placed: rotate left/right, variant selector mini, save design, exit.
-- [~] Chua co `arStore` de luu session state toan cuc.
+- [x] Co UI dieu khien AR: rotate left/right, variant selector mini va save design.
+- [x] Co `arStore` de luu session state toan cuc.
 - [~] Chua co capture screenshot/save thumbnail.
-- [~] Chua co plane detector UI rieng; model-viewer/Scene Viewer xu ly native.
-- [ ] Chua co Three.js fallback rieng cho desktop.
+- [x] Co plane detector UI rieng cho trang AR; model-viewer/Scene Viewer van xu ly native.
+- [x] Co `ThreeViewer` fallback rieng cho desktop/non-model.
 
 ### CartPage / CartSheet
 
@@ -114,8 +114,8 @@ Quy uoc trang thai:
 - [x] Co cart drawer slide-over tu layout, overlay, item list, total, link xem gio hang.
 - [x] Co badge so luong trong header/bottom nav.
 - [x] Cart state persist localStorage.
-- [~] Cart drawer chi hien toi da 3 item (`items.slice(0, 3)`), chua scroll full list.
-- [~] Quantity controls chua co input min/max 1-99.
+- [x] Cart drawer hien full list item.
+- [~] Quantity controls clamp 1-99 trong store, chua co input truc tiep.
 - [~] Chua sync optimistic voi server API trong store.
 
 ### CheckoutPage
@@ -126,7 +126,7 @@ Quy uoc trang thai:
 - [x] Tao mock order qua `orderApi.createOrder`, clear cart, den OrderSuccess.
 - [~] Schema field khac spec (`recipientName`, `street`, `cod`) nhung dap ung flow tuong duong.
 - [~] Chua dung `@hookform/resolvers/zod`; dang parse Zod trong `onSubmit`.
-- [ ] Chua co ProtectedRoute yeu cau dang nhap truoc checkout.
+- [x] Co ProtectedRoute yeu cau dang nhap truoc checkout.
 
 ### Auth Pages
 
@@ -135,30 +135,30 @@ Quy uoc trang thai:
 - [x] Co mock auth API va persist auth state.
 - [x] Co redirect khi da login.
 - [x] Co toast loi/thanh cong.
-- [~] Register password rule chua yeu cau chu hoa/chu thuong/so nhu spec.
-- [~] Auth store chua co `initialize()` refresh token luc app start.
-- [ ] Chua co `ProtectedRoute`.
-- [ ] Chua co auth modal khi can login.
+- [x] Register password rule yeu cau chu hoa/chu thuong/so.
+- [x] Auth store co `initialize()` luc app start de nap lai user.
+- [x] Co `ProtectedRoute`.
+- [~] ProtectedRoute redirect ve login khi can auth; chua co auth modal overlay rieng.
 
 ### Wishlist / Designs
 
 - [x] Co WishlistPage va wishlist store persist.
 - [x] Product card co toggle wishlist.
-- [~] Wishlist hien la local-only, chua co API sync/protected route.
-- [~] ProductDetail `saveDesign()` moi luu localStorage thong tin san pham/color/material, chua co design page/grid.
-- [ ] Chua co DesignsPage.
-- [ ] Chua co SharedDesignPage.
-- [ ] Chua co clone design / add all to cart.
-- [ ] Chua co SaveDesignModal, ShareDesignButton, DesignViewer.
+- [~] Wishlist hien la local-first, co `wishlist.api.ts` mock va ProtectedRoute; chua co backend sync that.
+- [x] ProductDetail `saveDesign()` mo modal va luu vao `designStore`; co design page/grid.
+- [x] Co DesignsPage.
+- [x] Co SharedDesignPage.
+- [x] Co clone design / add design to cart.
+- [x] Co SaveDesignModal, ShareDesignButton, DesignViewer.
 
 ### Orders / Account / Reviews
 
 - [x] Co OrderSuccessPage sau checkout.
-- [~] `orderApi` co ham `getOrders`, `getOrderDetail` nhung UI chua co.
-- [ ] Chua co OrdersPage.
-- [ ] Chua co OrderDetailPage.
-- [ ] Chua co AccountPage.
-- [ ] Chua co review API, review components, review form, rating distribution.
+- [x] `orderApi` co ham `getOrders`, `getOrderDetail` va UI danh sach/chi tiet.
+- [x] Co OrdersPage.
+- [x] Co OrderDetailPage.
+- [x] Co AccountPage.
+- [x] Co review API, review components, review form, rating distribution.
 
 ## 4. State Management
 
@@ -169,9 +169,9 @@ Quy uoc trang thai:
 - [x] `themeStore` persist dark/light theme.
 - [~] `cartStore` optimistic local update co UI immediate, nhung action khong async va chua call/rollback server API.
 - [~] Auth refresh token co trong axios interceptor, nhung store chua expose async `refreshToken()` va `initialize()`.
-- [ ] Chua co `designStore`.
-- [ ] Chua co `uiStore`.
-- [ ] Chua co `arStore`.
+- [x] Co `designStore`.
+- [x] Co `uiStore`.
+- [x] Co `arStore`.
 - [~] Co query key factory trong `src/constants/queryKeys.ts`; chua co TanStack React Query setup va `QueryClientProvider`.
 
 ## 5. API Service Layer
@@ -184,25 +184,25 @@ Quy uoc trang thai:
 - [x] Co `auth.api.ts` login/register/getMe/logout mock va real API fallback.
 - [x] Co `cart.api.ts` get/sync cart.
 - [x] Co `order.api.ts` create/list/detail order.
-- [~] Base URL hien fallback `http://localhost:3001/api`, khac spec `http://localhost:3000/api/v1`.
+- [x] Base URL uu tien `VITE_API_BASE_URL` va fallback `http://localhost:4000/api/v1`.
 - [~] Refresh token dung body payload, khong dung httpOnly cookie `withCredentials`.
-- [ ] Chua co failed request queue khi refresh token dang chay.
-- [ ] Chua co `review.api.ts`.
-- [ ] Chua co `design.api.ts`.
-- [ ] Chua co `wishlist.api.ts`.
-- [ ] Chua co `search.api.ts`.
-- [ ] Chua co `upload.api.ts`.
-- [ ] Chua co React Query hooks `useProducts`, `useProduct`, `useReviews`, mutations.
+- [x] Co failed request queue khi refresh token dang chay.
+- [x] Co `review.api.ts`.
+- [x] Co `design.api.ts`.
+- [x] Co `wishlist.api.ts`.
+- [x] Co `search.api.ts`.
+- [x] Co `upload.api.ts`.
+- [~] Co hooks `useProducts`, `useProduct`, `useReviews` mock/local; chua dung React Query/mutations v5.
 
 ## 6. Component Specifications
 
 ### UI / Design System
 
 - [x] Co `Button`, `TextInput`, `Select`, `ThemeToggle`, `Toaster` Sonner.
-- [~] `Button` moi co `primary | secondary | ghost`, chua co `icon | ar`, `size`, `isLoading`, left/right icon.
+- [x] `Button` co `primary | secondary | ghost | icon | ar`, `size`, `isLoading`, left/right icon.
 - [~] Form fields hien co component co ban nhung cac page auth/checkout dang dung input raw.
-- [ ] Chua co `Badge`, `Card`, `Modal`, `Skeleton`, `Spinner`, `EmptyState`, `ErrorBoundary` component rieng.
-- [ ] Chua co `Toast.tsx` rieng; dang dung `sonner`.
+- [x] Co `Badge`, `Card`, `Modal`, `Skeleton`, `Spinner`, `EmptyState`, `ErrorBoundary` component rieng.
+- [x] Co `Toast.tsx` re-export `sonner`.
 
 ### Layout
 
@@ -211,8 +211,8 @@ Quy uoc trang thai:
 - [x] Co `Layout`.
 - [x] Co `CartSheet`.
 - [~] Header co logo/nav/theme/wishlist/cart/account, nhung mobile hamburger/search chua day du nhu spec.
-- [~] Landing co footer, Layout chua co Footer chung.
-- [ ] Chua co `PageContainer`.
+- [x] Layout co Footer chung.
+- [x] Co `PageContainer`.
 
 ### Product Components
 
@@ -221,7 +221,7 @@ Quy uoc trang thai:
 - [x] ProductCard biet san pham da trong gio hang va doi style button.
 - [x] AR badge tren card mo dung `/ar/:id?color=...&material=...`.
 - [~] Da co them `ProductHero`, `ProductSpecs`, `VariantSelector`, `RoomPresetSelector`, `ProductConfidencePanel` trong `components/product`.
-- [~] Chua tach `ProductGrid`, `ProductFilter`, `ProductSort`, `ProductSearch`, `ColorSwatch`, `DimensionDisplay`, `PriceDisplay`, `StockBadge`, `RelatedProducts` thanh component rieng.
+- [x] Co `ProductGrid`, `ProductFilter`, `ProductSort`, `ProductSearch`, `ColorSwatch`, `DimensionDisplay`, `PriceDisplay`, `StockBadge`, `RelatedProducts` component rieng.
 - [~] ProductDetail hien van dung selector inline cho data model hien tai, chua noi voi `VariantSelector` reusable theo spec.
 
 ### AR Components
@@ -232,19 +232,19 @@ Quy uoc trang thai:
 - [x] Co doi mau material dau tien bang selected color.
 - [x] Co type declaration cho `model-viewer`.
 - [~] Co cac component demo `TryInRoomGuide`, `TryInRoomSheet`, `ArActionBar`, `ArPlacementTips`, `ArSupportNotice`, nhung ProductTryOnPage demo dang comment.
-- [ ] Chua co `ARControls` production.
-- [ ] Chua co `ARFallback` component rieng.
-- [ ] Chua co `ModelLoader` progress component.
-- [ ] Chua co `PlaneDetector` component rieng.
-- [ ] Chua co `ThreeViewer` fallback.
+- [x] Co `ARControls` production.
+- [x] Co `ARFallback` component rieng.
+- [x] Co `ModelLoader` progress component.
+- [x] Co `PlaneDetector` component rieng.
+- [x] Co `ThreeViewer` fallback.
 
 ### Cart / Review / Design / Auth Components
 
 - [x] Co cart sheet/page logic trong `components/cart/CartSheet.tsx` va `pages/CartPage.tsx`.
 - [~] Da co `CartSheet`; chua tach `CartItem`, `CartSummary`, `CartBadge`.
-- [ ] Chua co `ReviewList`, `ReviewCard`, `ReviewForm`, `RatingInput`, `RatingDisplay`, `RatingDistribution`, `HelpfulButton`.
-- [ ] Chua co `DesignCard`, `DesignGrid`, `SaveDesignModal`, `ShareDesignButton`, `DesignViewer`.
-- [ ] Chua co `LoginForm`, `RegisterForm`, `ProtectedRoute` component rieng.
+- [x] Co `ReviewList`, `ReviewCard`, `ReviewForm`, `RatingInput`, `RatingDisplay`, `RatingDistribution`, `HelpfulButton`.
+- [x] Co `DesignCard`, `DesignGrid`, `SaveDesignModal`, `ShareDesignButton`, `DesignViewer`.
+- [x] Co `LoginForm`, `RegisterForm`, `ProtectedRoute` component rieng.
 
 ## 7. AR & 3D Module
 
@@ -252,12 +252,12 @@ Quy uoc trang thai:
 - [x] `ModelViewer` co `ar`, `ar-modes`, `camera-controls`, `auto-rotate`, shadow/exposure/environment.
 - [x] ARPage co mobile-friendly bottom sheet, CTA mo AR, fallback message.
 - [x] San pham co `modelUrl`, `arSupported`, image poster.
-- [~] `useARSupport` chua detect Quick Look/Scene Viewer chi tiet nhu spec (`webXR`, `sceneViewer`, `quickLook`, `any`).
-- [~] AR flow chua day du state machine `inactive/loading/active/placed/error`.
-- [~] Chua co controls sau placement: rotate, variant selector mini, save design, add to cart trong AR overlay native.
-- [ ] Chua co capture AR screenshot.
-- [ ] Chua co session save/load design trong AR.
-- [ ] Chua co performance checks FPS/model load time.
+- [~] `useARSupport` chua detect Quick Look/Scene Viewer chi tiet nhu spec, nhung da co helper `arUtils` cho `webXR`, `sceneViewer`, `quickLook`.
+- [x] AR flow co state machine co ban `inactive/loading/active/placed/error` trong `arStore`.
+- [x] Co controls sau placement/preview: rotate, variant selector mini, save design, add to cart trong bottom sheet.
+- [~] Co helper `captureARScreenshot`; chua co UI capture thumbnail production.
+- [x] Co session save design trong AR qua `designStore`; load qua Designs/SharedDesign.
+- [~] Co checklist performance/AR trong `docs/quality-checklist.md`; chua co do FPS/model load time tu dong.
 
 ## 8. Form Handling & Validation
 
@@ -267,10 +267,10 @@ Quy uoc trang thai:
 - [x] Checkout validation: recipient, phone, province, district, ward, street.
 - [x] Inline field errors va toast popup.
 - [~] Chua dung `@hookform/resolvers/zod`.
-- [~] Chua co central `src/utils/schemas.ts`.
+- [x] Co central `src/utils/schemas.ts`.
 - [~] Chua dung mode `onBlur` theo pattern dac ta.
-- [ ] Chua co review form validation.
-- [ ] Chua co image upload validation.
+- [x] Co review form validation.
+- [x] Co image upload validation.
 
 ## 9. Error Handling
 
@@ -279,11 +279,11 @@ Quy uoc trang thai:
 - [x] ProductDetail co not-found inline.
 - [x] Catalog/Cart/Wishlist co empty states inline.
 - [x] Checkout redirect/toast khi gio hang trong.
-- [~] Chua co helper `getErrorMessage`, `getErrorCode` dung chung.
-- [~] Chua co typed `ApiError`/`ApiErrorResponse` day du nhu spec.
-- [ ] Chua co `ErrorBoundary`.
-- [ ] Chua co `NotFoundPage` rieng.
-- [ ] Chua co fallback UI cho route/page crash.
+- [x] Co helper `getErrorMessage`, `getErrorCode` dung chung.
+- [x] Co typed `ApiErrorResponse`.
+- [x] Co `ErrorBoundary`.
+- [x] Co `NotFoundPage` rieng.
+- [x] Co fallback UI cho route/page crash.
 
 ## 10. Loading & Skeleton States
 
@@ -291,11 +291,11 @@ Quy uoc trang thai:
 - [x] ProductDetail co skeleton page.
 - [x] ModelViewer co loading state "Dang tai model 3D".
 - [x] Login/Register/Checkout submit button co loading/disabled text.
-- [~] Chua co base `Skeleton` component reusable.
+- [x] Co base `Skeleton` component reusable.
 - [~] CartSheet chua co spinner overlay khi sync API.
 - [~] Image progressive blur-up chua co.
-- [ ] Chua co page transition top bar/spinner.
-- [ ] Chua co review skeleton.
+- [x] Co page transition top bar/spinner qua Suspense fallback.
+- [~] Review co loading mock nhe, chua co skeleton rieng cho review.
 
 ## 11. Responsive Behavior
 
@@ -306,8 +306,8 @@ Quy uoc trang thai:
 - [x] ProductDetail/Cart/Checkout co responsive layout.
 - [x] ARPage thiet ke mobile-first voi full-screen viewer va bottom sheet.
 - [~] Header mobile chua co hamburger menu theo spec.
-- [~] Bottom nav co 5 khu vuc/AR center, nhung tab "Tai khoan" chua co; wishlist dang label "Toi".
-- [~] Layout chua co footer chung.
+- [x] Bottom nav co 5 khu vuc/AR center va tab "Tai khoan".
+- [x] Layout co footer chung.
 - [~] Can verify UI tren mobile/desktop bang screenshot test.
 
 ## 12. PWA Configuration
@@ -315,11 +315,11 @@ Quy uoc trang thai:
 - [x] Co `public/favicon.svg` va `public/icons.svg`.
 - [x] Co public GLB models.
 - [ ] Chua cai `vite-plugin-pwa`.
-- [ ] Chua co `public/manifest.json` hoac `manifest.webmanifest`.
-- [ ] Chua co icon PNG 192x192, 512x512, maskable.
-- [ ] Chua co service worker auto update.
-- [ ] Chua co cache strategy cho fonts/images/products/models.
-- [ ] Chua co PWA install/display standalone config.
+- [x] Co `public/manifest.webmanifest`.
+- [~] Co icon SVG maskable trong manifest; chua co icon PNG 192x192, 512x512.
+- [~] Co service worker custom va claim/activate; chua co auto-update prompt rieng.
+- [x] Co cache strategy co ban cho images/fonts/models/static route.
+- [x] Co PWA install/display standalone config.
 
 ## 13. Environment & Config
 
@@ -327,11 +327,11 @@ Quy uoc trang thai:
 - [x] Co `VITE_API_URL` va `VITE_USE_MOCK`.
 - [x] Co Vite config voi React plugin va Tailwind plugin.
 - [~] `.env.example` co ca backend variables, chua tach web `.env.local`/production nhu spec.
-- [~] Co `VITE_API_BASE_URL` va `VITE_API_URL` song song; can chuan hoa.
-- [ ] Chua co `VITE_CLOUDINARY_CLOUD_NAME`.
-- [ ] Chua co `VITE_APP_URL`.
-- [ ] Chua co `VITE_MODEL_VIEWER_VERSION`.
-- [ ] Chua co production env sample theo spec.
+- [x] Da chuan hoa uu tien `VITE_API_BASE_URL`; bo duplicate `VITE_API_URL` trong `.env.example`.
+- [x] Co `VITE_CLOUDINARY_CLOUD_NAME`.
+- [x] Co `VITE_APP_URL`.
+- [x] Co `VITE_MODEL_VIEWER_VERSION`.
+- [x] Co `.env.production.example`.
 
 ## 14. TypeScript Types & Data Model
 
@@ -340,20 +340,20 @@ Quy uoc trang thai:
 - [~] Product model runtime hien don gian hon spec trong `src/types/index.ts`; `src/types/product.types.ts` giu kieu prototype cho cac component product reusable.
 - [~] User model hien don gian hon spec: chua co role, displayName/avatarUrl, stats.
 - [~] Cart model hien la mang item local, chua co `Cart` summary envelope.
-- [ ] Chua co review types.
-- [ ] Chua co design types.
-- [ ] Chua co paginated response meta day du (`success`, `meta.totalPages`, `hasNextPage`, ...).
-- [ ] Chua co API error response type day du.
+- [x] Co review types.
+- [x] Co design types.
+- [~] Co pagination mo rong `totalPages`, `hasNextPage`, `hasPreviousPage`; chua doi envelope sang `success/meta` rieng.
+- [x] Co API error response type.
 
 ## 15. Utility Functions
 
 - [x] Co `formatVnd` va alias `formatPrice` trong `src/utils/formatPrice.ts`.
 - [x] Co `createDemoId` trong `src/utils/ids.ts`.
 - [x] `formatVnd`/`formatPrice` dap ung format VND.
-- [ ] Chua co `formatDate`.
-- [ ] Chua co `cn` class merge helper.
-- [ ] Chua co `captureARScreenshot`.
-- [ ] Chua co `isModelViewerSupported`.
+- [x] Co `formatDate`.
+- [x] Co `cn` class merge helper.
+- [x] Co `captureARScreenshot`.
+- [x] Co `isModelViewerSupported`.
 
 ## 16. Build, Lint, Quality
 
@@ -361,9 +361,9 @@ Quy uoc trang thai:
 - [x] `npm run lint` pass sau khi xu ly rule `react-hooks/set-state-in-effect`.
 - [x] TypeScript strict build dang pass.
 - [ ] Chua co unit tests.
-- [ ] Chua co Playwright/e2e tests.
-- [ ] Chua co accessibility audit.
-- [ ] Chua co performance/AR device test checklist.
+- [~] Co E2E smoke checklist trong `docs/quality-checklist.md`; chua co Playwright/e2e tests tu dong.
+- [~] Co accessibility audit checklist trong `docs/quality-checklist.md`; chua chay audit tu dong.
+- [x] Co performance/AR device test checklist.
 
 ## 17. De Xuat Uu Tien Tiep Theo
 

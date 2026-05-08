@@ -2,16 +2,22 @@ import { ArrowLeft, ScanLine, ShoppingBag, Smartphone } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { ARControls } from "../components/ar/ARControls";
+import { ARFallback } from "../components/ar/ARFallback";
 import {
   ModelViewer,
   type ModelViewerArStatus,
   type ModelViewerHandle,
 } from "../components/ar/ModelViewer";
+import { PlaneDetector } from "../components/ar/PlaneDetector";
+import { ThreeViewer } from "../components/ar/ThreeViewer";
 import { useARSupport } from "../hooks/useARSupport";
 import { productApi } from "../services/product.api";
 import { formatVnd } from "../utils/formatPrice";
+import { useArStore } from "../store/arStore";
 import { useCartStore } from "../store/cartStore";
-import type { Product } from "../types";
+import { useDesignStore } from "../store/designStore";
+import type { Product, ProductColor, ProductMaterial } from "../types";
 
 export function ARPage() {
   const { id } = useParams();
@@ -21,11 +27,18 @@ export function ARPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [canActivateAR, setCanActivateAR] = useState(false);
+  const [selectedColorId, setSelectedColorId] = useState("");
+  const [selectedMaterialId, setSelectedMaterialId] = useState("");
   const [arStatus, setArStatus] = useState<ModelViewerArStatus | "idle">(
     "idle",
   );
   const [isLaunchingAR, setIsLaunchingAR] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
+  const addDesign = useDesignStore((state) => state.addDesign);
+  const rotateLeft = useArStore((state) => state.rotateLeft);
+  const rotateRight = useArStore((state) => state.rotateRight);
+  const setArSelection = useArStore((state) => state.setSelection);
+  const setArStoreStatus = useArStore((state) => state.setStatus);
 
   useEffect(() => {
     if (!id) {
@@ -38,6 +51,10 @@ export function ARPage() {
       .then((response) => {
         if (isMounted) {
           setProduct(response.data);
+          setSelectedColorId(searchParams.get("color") ?? response.data.colors[0]?.id ?? "");
+          setSelectedMaterialId(
+            searchParams.get("material") ?? response.data.materials[0]?.id ?? "",
+          );
         }
       })
       .finally(() => {
@@ -49,7 +66,7 @@ export function ARPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, searchParams]);
 
   const selectedColor = useMemo(() => {
     if (!product) {
@@ -57,10 +74,10 @@ export function ARPage() {
     }
 
     return (
-      product.colors.find((color) => color.id === searchParams.get("color")) ??
+      product.colors.find((color) => color.id === selectedColorId) ??
       product.colors[0]
     );
-  }, [product, searchParams]);
+  }, [product, selectedColorId]);
 
   const selectedMaterial = useMemo(() => {
     if (!product) {
@@ -69,10 +86,10 @@ export function ARPage() {
 
     return (
       product.materials.find(
-        (material) => material.id === searchParams.get("material"),
+        (material) => material.id === selectedMaterialId,
       ) ?? product.materials[0]
     );
-  }, [product, searchParams]);
+  }, [product, selectedMaterialId]);
 
   const finalPrice = useMemo(() => {
     if (!product || !selectedMaterial) {
@@ -81,6 +98,12 @@ export function ARPage() {
 
     return product.basePrice + selectedMaterial.surcharge;
   }, [product, selectedMaterial]);
+
+  useEffect(() => {
+    if (selectedColor && selectedMaterial) {
+      setArSelection(selectedColor, selectedMaterial);
+    }
+  }, [selectedColor, selectedMaterial, setArSelection]);
 
   const arStatusMessage = useMemo(() => {
     if (!product?.modelUrl) {
@@ -142,8 +165,10 @@ export function ARPage() {
       toast.success("Đang mở AR", {
         description: "Quét mặt sàn chậm để đặt sản phẩm.",
       });
+      setArStoreStatus("active");
     } catch {
       setArStatus("failed");
+      setArStoreStatus("error");
       toast.error("Không thể mở AR", {
         description: "Vui lòng thử lại hoặc dùng viewer 3D.",
       });
@@ -165,9 +190,37 @@ export function ARPage() {
     setArStatus(status);
 
     if (status === "failed") {
+      setArStoreStatus("error");
       setIsLaunchingAR(false);
       toast.error("Phiên AR không khởi động được");
+      return;
     }
+
+    if (status === "object-placed") {
+      setArStoreStatus("placed");
+      return;
+    }
+
+    if (status === "session-started") {
+      setArStoreStatus("active");
+      return;
+    }
+
+    setArStoreStatus("inactive");
+  }
+
+  function handleSaveDesign() {
+    if (!product || !selectedColor || !selectedMaterial) return;
+    addDesign({ product, selectedColor, selectedMaterial });
+    toast.success("Đã lưu thiết kế AR");
+  }
+
+  function handleColorChange(color: ProductColor) {
+    setSelectedColorId(color.id);
+  }
+
+  function handleMaterialChange(material: ProductMaterial) {
+    setSelectedMaterialId(material.id);
   }
 
   if (isLoading) {
@@ -201,8 +254,9 @@ export function ARPage() {
             src={product.modelUrl}
           />
         ) : (
-          <img src={product.images[0]} alt={product.name} />
+          <ThreeViewer color={selectedColor.hex} />
         )}
+        {arStatus === "session-started" ? <PlaneDetector /> : null}
       </div>
 
       <aside className="ar-bottom-sheet" aria-label="Điều khiển AR">
@@ -222,6 +276,20 @@ export function ARPage() {
           <Smartphone size={16} />
           <span>{arStatusMessage}</span>
         </div>
+
+        {!canActivateAR ? <ARFallback message={arStatusMessage} /> : null}
+
+        <ARControls
+          colors={product.colors}
+          materials={product.materials}
+          selectedColor={selectedColor}
+          selectedMaterial={selectedMaterial}
+          onColorChange={handleColorChange}
+          onMaterialChange={handleMaterialChange}
+          onRotateLeft={rotateLeft}
+          onRotateRight={rotateRight}
+          onSave={handleSaveDesign}
+        />
 
         <div className="ar-actions">
           <button

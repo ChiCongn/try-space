@@ -1,6 +1,20 @@
 import { apiClient, mockDelay, useMockApi } from "./api";
 import type { ApiResponse, CreateOrderPayload, Order } from "../types";
 
+const mockOrdersKey = "tryspace-mock-orders";
+
+function readMockOrders() {
+  try {
+    return JSON.parse(localStorage.getItem(mockOrdersKey) ?? "[]") as Order[];
+  } catch {
+    return [];
+  }
+}
+
+function writeMockOrders(orders: Order[]) {
+  localStorage.setItem(mockOrdersKey, JSON.stringify(orders));
+}
+
 export const orderApi = {
   async createOrder(payload: CreateOrderPayload): Promise<ApiResponse<Order>> {
     if (useMockApi) {
@@ -18,6 +32,7 @@ export const orderApi = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+      writeMockOrders([order, ...readMockOrders()]);
       return { data: order, message: "Đặt hàng thành công" };
     }
 
@@ -28,7 +43,8 @@ export const orderApi = {
   async getOrders(): Promise<ApiResponse<Order[]>> {
     if (useMockApi) {
       await mockDelay(300);
-      return { data: [] };
+      const data = readMockOrders();
+      return { data, pagination: { limit: data.length, page: 1, total: data.length } };
     }
 
     const response = await apiClient.get<ApiResponse<Order[]>>("/orders");
@@ -38,7 +54,9 @@ export const orderApi = {
   async getOrderDetail(orderId: string): Promise<ApiResponse<Order>> {
     if (useMockApi) {
       await mockDelay(200);
-      throw new Error("Order not found");
+      const order = readMockOrders().find((item) => item.id === orderId);
+      if (!order) throw new Error("Order not found");
+      return { data: order };
     }
 
     const response = await apiClient.get<ApiResponse<Order>>(`/orders/${orderId}`);

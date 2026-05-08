@@ -37,7 +37,7 @@ export const useCartStore = create<CartStore>()(
             isOpen: true,
             items: get().items.map((item) =>
               item.id === existing.id
-                ? { ...item, quantity: item.quantity + quantity }
+                ? { ...item, quantity: Math.min(99, item.quantity + quantity) }
                 : item,
             ),
           });
@@ -48,7 +48,7 @@ export const useCartStore = create<CartStore>()(
           finalPrice: product.basePrice + material.surcharge,
           id: nanoid(),
           product,
-          quantity,
+          quantity: Math.min(99, quantity),
           selectedColor: color,
           selectedMaterial: material,
         };
@@ -75,9 +75,10 @@ export const useCartStore = create<CartStore>()(
           return;
         }
 
+        const nextQuantity = Math.min(99, quantity);
         set({
           items: get().items.map((item) =>
-            item.id === id ? { ...item, quantity } : item,
+            item.id === id ? { ...item, quantity: nextQuantity } : item,
           ),
         });
       },

@@ -7,6 +7,7 @@ interface AuthStore {
   accessToken: string | null;
   refreshToken: string | null;
   isLoading: boolean;
+  initialize: () => Promise<void>;
   isLoggedIn: () => boolean;
   setUser: (user: User) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -18,6 +19,21 @@ export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       accessToken: null,
+      initialize: async () => {
+        const { accessToken, user } = get();
+        if (!accessToken || user) return;
+
+        set({ isLoading: true });
+        try {
+          const { authApi } = await import("../services/auth.api");
+          const response = await authApi.getMe();
+          set({ user: response.data });
+        } catch {
+          get().logout();
+        } finally {
+          set({ isLoading: false });
+        }
+      },
       isLoading: false,
       isLoggedIn: () => Boolean(get().accessToken),
       logout: () =>

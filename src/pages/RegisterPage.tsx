@@ -14,7 +14,12 @@ const schema = z
     confirmPassword: z.string(),
     email: z.string().email("Email không hợp lệ"),
     name: z.string().min(2, "Tên tối thiểu 2 ký tự"),
-    password: z.string().min(8, "Mật khẩu tối thiểu 8 ký tự"),
+    password: z
+      .string()
+      .min(8, "Mật khẩu tối thiểu 8 ký tự")
+      .regex(/[a-z]/, "Mật khẩu cần có chữ thường")
+      .regex(/[A-Z]/, "Mật khẩu cần có chữ hoa")
+      .regex(/[0-9]/, "Mật khẩu cần có chữ số"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Mật khẩu xác nhận không khớp",

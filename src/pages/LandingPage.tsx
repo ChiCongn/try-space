@@ -71,6 +71,21 @@ export function LandingPage() {
         </motion.div>
       </section>
 
+      <section className="landing-stats" aria-label="TrySpace stats">
+        <div>
+          <strong>12+</strong>
+          <span>Mẫu demo</span>
+        </div>
+        <div>
+          <strong>1:1</strong>
+          <span>Tỉ lệ AR</span>
+        </div>
+        <div>
+          <strong>3</strong>
+          <span>Bước thử phòng</span>
+        </div>
+      </section>
+
       <section className="feature-grid">
         <article>
           <Camera />

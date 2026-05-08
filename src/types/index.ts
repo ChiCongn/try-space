@@ -64,7 +64,16 @@ export interface ApiResponse<T> {
     page: number;
     limit: number;
     total: number;
+    totalPages?: number;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
   };
+}
+
+export interface ApiErrorResponse {
+  code?: string;
+  message: string;
+  statusCode?: number;
 }
 
 export interface LoginPayload {
@@ -112,3 +121,57 @@ export interface CreateOrderPayload {
   paymentMethod: PaymentMethod;
   notes?: string;
 }
+
+export interface Review {
+  id: string;
+  productId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  title: string;
+  content: string;
+  helpfulCount: number;
+  createdAt: string;
+}
+
+export interface CreateReviewPayload {
+  productId: string;
+  rating: number;
+  title: string;
+  content: string;
+}
+
+export interface RatingSummary {
+  average: number;
+  total: number;
+  distribution: Record<1 | 2 | 3 | 4 | 5, number>;
+}
+
+export interface SavedDesign {
+  id: string;
+  name: string;
+  product: Product;
+  selectedColor: ProductColor;
+  selectedMaterial: ProductMaterial;
+  shareToken: string;
+  thumbnailUrl?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SaveDesignPayload {
+  name?: string;
+  product: Product;
+  selectedColor: ProductColor;
+  selectedMaterial: ProductMaterial;
+  thumbnailUrl?: string;
+  notes?: string;
+}
+
+export type ArSessionStatus =
+  | "inactive"
+  | "loading"
+  | "active"
+  | "placed"
+  | "error";

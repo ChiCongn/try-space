@@ -27,6 +27,9 @@ export function OrderSuccessPage() {
         </p>
 
         <div className="success-actions">
+          <Link className="primary-link" to={`/orders/${orderId}`}>
+            Xem đơn hàng
+          </Link>
           <Link className="primary-link" to="/catalog">
             Tiếp tục mua sắm
           </Link>

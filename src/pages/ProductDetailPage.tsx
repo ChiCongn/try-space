@@ -15,6 +15,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ModelViewer } from "../components/ar/ModelViewer";
+import { SaveDesignModal } from "../components/design/SaveDesignModal";
+import { RelatedProducts } from "../components/product/RelatedProducts";
+import { ReviewList } from "../components/review/ReviewList";
 import { productApi } from "../services/product.api";
 import { formatVnd } from "../utils/formatPrice";
 import { useCartStore } from "../store/cartStore";
@@ -51,6 +54,7 @@ export function ProductDetailPage() {
   const [selectedMaterial, setSelectedMaterial] =
     useState<ProductMaterial | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [saveDesignOpen, setSaveDesignOpen] = useState(false);
   const [added, setAdded] = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
@@ -123,23 +127,7 @@ export function ProductDetailPage() {
       return;
     }
 
-    const hash = `design_${Date.now().toString(36)}`;
-    try {
-      localStorage.setItem(
-        `tryspace-design-${hash}`,
-        JSON.stringify({
-          hash,
-          productId: product.id,
-          selectedColor,
-          selectedMaterial,
-        }),
-      );
-      toast.success("Đã lưu thiết kế");
-    } catch {
-      toast.error("Không thể lưu thiết kế", {
-        description: "Trình duyệt không cho phép lưu dữ liệu lúc này.",
-      });
-    }
+    setSaveDesignOpen(true);
   }
 
   function handleToggleWishlist() {
@@ -539,6 +527,17 @@ export function ProductDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <RelatedProducts product={product} />
+      <ReviewList productId={product.id} />
+      <SaveDesignModal
+        open={saveDesignOpen}
+        product={product}
+        selectedColor={selectedColor}
+        selectedMaterial={selectedMaterial}
+        thumbnailUrl={product.images[activeImg]}
+        onClose={() => setSaveDesignOpen(false)}
+      />
     </div>
   );
 }
