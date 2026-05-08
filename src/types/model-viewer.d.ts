@@ -11,6 +11,7 @@ type ModelViewerElementAttributes = DetailedHTMLProps<
   "ar-modes"?: string;
   "ar-placement"?: "floor" | "wall";
   "ar-scale"?: "auto" | "fixed";
+  "ar-usdz-max-texture-size"?: string;
   "camera-controls"?: boolean;
   "auto-rotate"?: boolean;
   "shadow-intensity"?: string;
@@ -20,10 +21,13 @@ type ModelViewerElementAttributes = DetailedHTMLProps<
   "touch-action"?: string;
   "camera-orbit"?: string;
   "field-of-view"?: string;
+  "ios-src"?: string;
   loading?: "auto" | "lazy" | "eager";
   onLoad?: () => void;
   onError?: () => void;
+  "quick-look-browsers"?: string;
   reveal?: "auto" | "interaction" | "manual";
+  "xr-environment"?: boolean;
 };
 
 declare global {

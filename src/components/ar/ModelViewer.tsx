@@ -1,6 +1,7 @@
 import "@google/model-viewer";
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -18,8 +19,8 @@ type MaterialModel = {
 type ModelViewerDomElement = HTMLElement & {
   activateAR?: () => Promise<void>;
   canActivateAR?: boolean;
-  model?: MaterialModel;
   dismissPoster?: () => void;
+  model?: MaterialModel;
 };
 
 export type ModelViewerArStatus =
@@ -30,15 +31,20 @@ export type ModelViewerArStatus =
 
 export type ModelViewerHandle = {
   canStartAR: () => boolean;
+  getElement: () => ModelViewerDomElement | null;
   startAR: () => Promise<boolean>;
 };
+
+export type ModelViewerLoadStatus = "error" | "loading" | "ready";
 
 type ModelViewerProps = {
   src: string;
   poster: string;
   alt: string;
+  iosSrc?: string;
   onArAvailabilityChange?: (canActivateAR: boolean) => void;
   onArStatusChange?: (status: ModelViewerArStatus) => void;
+  onLoadStatusChange?: (status: ModelViewerLoadStatus) => void;
   selectedColor: string;
 };
 
@@ -51,14 +57,37 @@ function hexToRgba(hexColor: string): [number, number, number, number] {
   return [red, green, blue, 1];
 }
 
+function waitForEventOrTimeout(
+  element: HTMLElement,
+  eventName: string,
+  timeoutMs: number,
+) {
+  return new Promise<void>((resolve) => {
+    let settled = false;
+    const timeout = window.setTimeout(finish, timeoutMs);
+
+    function finish() {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      element.removeEventListener(eventName, finish);
+      resolve();
+    }
+
+    element.addEventListener(eventName, finish, { once: true });
+  });
+}
+
 export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
   function ModelViewer(
     {
       src,
       poster,
       alt,
+      iosSrc,
       onArAvailabilityChange,
       onArStatusChange,
+      onLoadStatusChange,
       selectedColor,
     },
     ref,
@@ -68,18 +97,50 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
       "loading",
     );
 
+    const syncAvailability = useCallback(() => {
+      onArAvailabilityChange?.(Boolean(viewerRef.current?.canActivateAR));
+    }, [onArAvailabilityChange]);
+
+    function updateStatus(nextStatus: ModelViewerLoadStatus) {
+      setStatus(nextStatus);
+      onLoadStatusChange?.(nextStatus);
+    }
+
     useImperativeHandle(ref, () => ({
       canStartAR() {
         return Boolean(
           viewerRef.current?.activateAR && viewerRef.current.canActivateAR,
         );
       },
+      getElement() {
+        return viewerRef.current;
+      },
       async startAR() {
-        if (!viewerRef.current?.activateAR || !viewerRef.current.canActivateAR) {
+        const viewer = viewerRef.current;
+
+        if (!viewer?.activateAR || status === "error") {
           return false;
         }
 
-        await viewerRef.current.activateAR();
+        viewer.dismissPoster?.();
+
+        if (status === "loading") {
+          await waitForEventOrTimeout(viewer, "load", 2200);
+        }
+
+        await new Promise<void>((resolve) => {
+          window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => resolve());
+          });
+        });
+
+        syncAvailability();
+
+        if (!viewer.canActivateAR) {
+          return false;
+        }
+
+        await viewer.activateAR();
         return true;
       },
     }));
@@ -91,10 +152,6 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
         return undefined;
       }
 
-      function syncAvailability() {
-        onArAvailabilityChange?.(Boolean(viewer?.canActivateAR));
-      }
-
       function handleArStatus(event: Event) {
         const statusDetail = (event as CustomEvent<{ status: ModelViewerArStatus }>)
           .detail.status;
@@ -104,13 +161,16 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
 
       viewer.addEventListener("ar-status", handleArStatus);
       viewer.addEventListener("load", syncAvailability);
-      window.setTimeout(syncAvailability, 0);
+      const timers = [0, 250, 750, 1500].map((delay) =>
+        window.setTimeout(syncAvailability, delay),
+      );
 
       return () => {
+        timers.forEach((timer) => window.clearTimeout(timer));
         viewer.removeEventListener("ar-status", handleArStatus);
         viewer.removeEventListener("load", syncAvailability);
       };
-    }, [onArAvailabilityChange, onArStatusChange]);
+    }, [onArStatusChange, syncAvailability]);
 
     useEffect(() => {
       const viewer = viewerRef.current;
@@ -136,6 +196,7 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
           ar-modes="scene-viewer webxr quick-look"
           ar-placement="floor"
           ar-scale="fixed"
+          ar-usdz-max-texture-size="1024"
           camera-controls
           auto-rotate
           shadow-intensity="0.85"
@@ -145,17 +206,24 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
           touch-action="pan-y"
           camera-orbit="-35deg 68deg 2.6m"
           field-of-view="32deg"
+          ios-src={iosSrc}
           loading="eager"
+          quick-look-browsers="safari chrome"
           reveal="auto"
-          onLoad={() => setStatus("ready")}
-          onError={() => setStatus("error")}
-        />
+          xr-environment
+          onLoad={() => updateStatus("ready")}
+          onError={() => updateStatus("error")}
+        >
+          <button className="model-viewer-ar-button" slot="ar-button" type="button">
+            Mở camera AR
+          </button>
+        </model-viewer>
 
-        {status === "loading" ? (
+        {/* {status === "loading" ? (
           <div className="viewer-state" role="status">
             Đang tải model 3D
           </div>
-        ) : null}
+        ) : null} */}
 
         {status === "error" ? (
           <div className="viewer-state viewer-state-error" role="alert">

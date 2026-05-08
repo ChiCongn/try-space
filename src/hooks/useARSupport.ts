@@ -6,9 +6,21 @@ type NavigatorWithXR = Navigator & {
   };
 };
 
+function getUserAgent() {
+  if (typeof navigator === "undefined") return "";
+  return navigator.userAgent;
+}
+
 export function useARSupport() {
-  const [supported, setSupported] = useState<boolean | null>(() =>
-    "xr" in navigator ? null : false,
+  const userAgent = getUserAgent();
+  const isAndroid = /Android/i.test(userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(userAgent);
+  const sceneViewer = isAndroid;
+  const quickLook = isIOS;
+
+  const [webXR, setWebXR] = useState<boolean | null>(() =>
+    typeof navigator !== "undefined" && "xr" in navigator ? null : false,
   );
 
   useEffect(() => {
@@ -17,20 +29,26 @@ export function useARSupport() {
     if (navigatorWithXR.xr) {
       navigatorWithXR.xr
         .isSessionSupported("immersive-ar")
-        .then(setSupported)
-        .catch(() => setSupported(false));
+        .then(setWebXR)
+        .catch(() => setWebXR(false));
       return;
     }
 
     return undefined;
   }, []);
 
-  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const any = Boolean(webXR || sceneViewer || quickLook);
 
   return {
-    arSupported: supported,
+    any,
+    arSupported: any,
+    isAndroid,
+    isIOS,
     isMobile,
-    useDesktopViewer: !isMobile,
-    useModelViewer: isMobile && supported === false,
+    quickLook,
+    sceneViewer,
+    useDesktopViewer: !isMobile || !any,
+    useModelViewer: isMobile,
+    webXR,
   };
 }

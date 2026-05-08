@@ -8,6 +8,7 @@ import {
   ModelViewer,
   type ModelViewerArStatus,
   type ModelViewerHandle,
+  type ModelViewerLoadStatus,
 } from "../components/ar/ModelViewer";
 import { PlaneDetector } from "../components/ar/PlaneDetector";
 import { ThreeViewer } from "../components/ar/ThreeViewer";
@@ -29,6 +30,8 @@ export function ARPage() {
   const [canActivateAR, setCanActivateAR] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState("");
   const [selectedMaterialId, setSelectedMaterialId] = useState("");
+  const [modelStatus, setModelStatus] =
+    useState<ModelViewerLoadStatus>("loading");
   const [arStatus, setArStatus] = useState<ModelViewerArStatus | "idle">(
     "idle",
   );
@@ -124,25 +127,64 @@ export function ARPage() {
         break;
     }
 
+    if (modelStatus === "loading") {
+      return "Đang tải model 3D. Nút mở camera sẽ sẵn sàng sau khi model tải xong.";
+    }
+
+    if (modelStatus === "error") {
+      return "Không tải được model 3D nên chưa thể mở camera AR.";
+    }
+
     if (canActivateAR) {
-      return "Thiết bị đã sẵn sàng mở AR.";
+      if (arSupport.sceneViewer) {
+        return "Sẵn sàng mở camera AR bằng Scene Viewer trên Android.";
+      }
+
+      if (arSupport.quickLook) {
+        return "Sẵn sàng mở camera AR bằng Quick Look trên iPhone/iPad.";
+      }
+
+      return "Thiết bị đã sẵn sàng mở camera AR.";
     }
 
     if (!arSupport.isMobile) {
       return "Đang xem 3D. Mở trang này trên điện thoại để thử AR trong phòng.";
     }
 
-    if (arSupport.arSupported === null) {
+    if (arSupport.webXR === null) {
       return "Đang kiểm tra khả năng AR của thiết bị.";
     }
 
-    return "Nếu không mở được AR, thiết bị sẽ dùng viewer 3D thay thế.";
-  }, [arStatus, arSupport.arSupported, arSupport.isMobile, canActivateAR, product]);
+    return "Trình duyệt này chưa báo hỗ trợ AR native. Hãy thử Chrome trên Android hoặc Safari trên iPhone.";
+  }, [
+    arStatus,
+    arSupport.isMobile,
+    arSupport.quickLook,
+    arSupport.sceneViewer,
+    arSupport.webXR,
+    canActivateAR,
+    modelStatus,
+    product,
+  ]);
 
   async function handleStartAR() {
     if (!product?.modelUrl) {
       toast.error("Chưa thể mở AR", {
         description: "Sản phẩm này chưa có model 3D.",
+      });
+      return;
+    }
+
+    if (modelStatus === "loading") {
+      toast.info("Model 3D đang tải", {
+        description: "Đợi vài giây rồi mở camera AR.",
+      });
+      return;
+    }
+
+    if (modelStatus === "error") {
+      toast.error("Không thể mở AR", {
+        description: "Model 3D chưa tải được.",
       });
       return;
     }
@@ -156,8 +198,8 @@ export function ARPage() {
         setArStatus("failed");
         toast.warning("Thiết bị chưa mở được AR", {
           description: arSupport.isMobile
-            ? "Hãy thử bằng Chrome trên Android hoặc Safari trên iPhone."
-            : "Mở trang này trên điện thoại để dùng AR.",
+            ? "Hãy dùng Chrome trên Android hoặc Safari trên iPhone, và mở trang bằng HTTPS hoặc URL có thể truy cập từ điện thoại."
+            : "Mở trang này trên điện thoại để dùng camera AR.",
         });
         return;
       }
@@ -249,6 +291,7 @@ export function ARPage() {
             alt={`AR model của ${product.name}`}
             onArAvailabilityChange={setCanActivateAR}
             onArStatusChange={handleArStatusChange}
+            onLoadStatusChange={setModelStatus}
             poster={product.images[0]}
             selectedColor={selectedColor.hex}
             src={product.modelUrl}
@@ -277,7 +320,9 @@ export function ARPage() {
           <span>{arStatusMessage}</span>
         </div>
 
-        {!canActivateAR ? <ARFallback message={arStatusMessage} /> : null}
+        {!canActivateAR || !arSupport.any ? (
+          <ARFallback message={arStatusMessage} />
+        ) : null}
 
         <ARControls
           colors={product.colors}
@@ -294,12 +339,14 @@ export function ARPage() {
         <div className="ar-actions">
           <button
             className="ar-actions__primary"
-            disabled={isLaunchingAR || !product.modelUrl}
+            disabled={
+              isLaunchingAR || !product.modelUrl || modelStatus === "error"
+            }
             type="button"
             onClick={handleStartAR}
           >
             <ScanLine size={18} />
-            {isLaunchingAR ? "Đang mở..." : "Mở AR"}
+            {isLaunchingAR ? "Đang mở..." : "Mở camera AR"}
           </button>
           <button type="button" onClick={handleAddToCart}>
             <ShoppingBag size={18} />
