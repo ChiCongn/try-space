@@ -16,10 +16,17 @@ type MaterialModel = {
   }>;
 };
 
+export type ModelViewerDimensions = {
+  x: number;
+  y: number;
+  z: number;
+};
+
 type ModelViewerDomElement = HTMLElement & {
   activateAR?: () => Promise<void>;
   canActivateAR?: boolean;
   dismissPoster?: () => void;
+  getDimensions?: () => ModelViewerDimensions;
   model?: MaterialModel;
 };
 
@@ -44,7 +51,9 @@ type ModelViewerProps = {
   iosSrc?: string;
   onArAvailabilityChange?: (canActivateAR: boolean) => void;
   onArStatusChange?: (status: ModelViewerArStatus) => void;
+  onModelDimensionsChange?: (dimensions: ModelViewerDimensions) => void;
   onLoadStatusChange?: (status: ModelViewerLoadStatus) => void;
+  modelScale?: string;
   selectedColor: string;
 };
 
@@ -85,14 +94,17 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
       poster,
       alt,
       iosSrc,
+      modelScale = "1 1 1",
       onArAvailabilityChange,
       onArStatusChange,
+      onModelDimensionsChange,
       onLoadStatusChange,
       selectedColor,
     },
     ref,
   ) {
     const viewerRef = useRef<ModelViewerDomElement | null>(null);
+    const previousSrcRef = useRef(src);
     const [status, setStatus] = useState<"loading" | "ready" | "error">(
       "loading",
     );
@@ -104,6 +116,17 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
     function updateStatus(nextStatus: ModelViewerLoadStatus) {
       setStatus(nextStatus);
       onLoadStatusChange?.(nextStatus);
+    }
+
+    function handleLoad() {
+      const viewer = viewerRef.current;
+      updateStatus("ready");
+      syncAvailability();
+
+      const dimensions = viewer?.getDimensions?.();
+      if (dimensions) {
+        onModelDimensionsChange?.(dimensions);
+      }
     }
 
     useImperativeHandle(ref, () => ({
@@ -173,6 +196,17 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
     }, [onArStatusChange, syncAvailability]);
 
     useEffect(() => {
+      if (previousSrcRef.current === src) {
+        return;
+      }
+
+      previousSrcRef.current = src;
+      setStatus("loading");
+      onLoadStatusChange?.("loading");
+      onArAvailabilityChange?.(false);
+    }, [onArAvailabilityChange, onLoadStatusChange, src]);
+
+    useEffect(() => {
       const viewer = viewerRef.current;
 
       if (!viewer?.model?.materials?.length) {
@@ -197,6 +231,7 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
           ar-placement="floor"
           ar-scale="fixed"
           ar-usdz-max-texture-size="1024"
+          scale={modelScale}
           camera-controls
           auto-rotate
           shadow-intensity="0.85"
@@ -211,7 +246,7 @@ export const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
           quick-look-browsers="safari chrome"
           reveal="auto"
           xr-environment
-          onLoad={() => updateStatus("ready")}
+          onLoad={handleLoad}
           onError={() => updateStatus("error")}
         >
           <button className="model-viewer-ar-button" slot="ar-button" type="button">

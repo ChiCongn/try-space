@@ -858,7 +858,7 @@
 }
 
 .ar-page {
-  background: #070707;
+  background: var(--bg-primary);
   color: var(--ink-primary);
   min-height: 100svh;
   overflow: hidden;
@@ -889,6 +889,7 @@
 }
 
 .ar-viewfinder {
+  background: var(--bg-primary);
   height: 100svh;
   position: relative;
 }
@@ -904,7 +905,12 @@
 }
 
 .ar-viewfinder .model-viewer-ar-button {
-  margin-bottom: 11rem;
+  bottom: calc(11rem + env(safe-area-inset-bottom));
+  left: 50%;
+  margin: 0;
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 5;
 }
 
 .ar-viewfinder > img {
@@ -1028,6 +1034,33 @@
   font-weight: 400;
 }
 
+.ar-product-meta {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ar-product-meta div {
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+  padding: 0.65rem 0.7rem;
+}
+
+.ar-product-meta span {
+  color: var(--ink-secondary);
+  font-size: 0.72rem;
+}
+
+.ar-product-meta strong {
+  color: var(--ink-primary);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
 .ar-support-note {
   align-items: flex-start;
   background: var(--bg-surface);
@@ -1071,6 +1104,10 @@
 }
 
 @media (min-width: 760px) {
+  .ar-viewfinder .model-viewer-ar-button {
+    bottom: 1.5rem;
+  }
+
   .ar-bottom-sheet {
     border: 1px solid var(--border);
     border-radius: 1.25rem;

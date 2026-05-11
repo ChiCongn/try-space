@@ -12,6 +12,7 @@ type ModelViewerElementAttributes = DetailedHTMLProps<
   "ar-placement"?: "floor" | "wall";
   "ar-scale"?: "auto" | "fixed";
   "ar-usdz-max-texture-size"?: string;
+  scale?: string;
   "camera-controls"?: boolean;
   "auto-rotate"?: boolean;
   "shadow-intensity"?: string;
