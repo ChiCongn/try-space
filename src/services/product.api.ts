@@ -1,6 +1,12 @@
-import { apiClient, mockDelay, useMockApi } from "./api";
-import type { ApiResponse, Product } from "../types";
-import mockProducts from "../assets/mock-data/products.json";
+import { apiClient } from "./api";
+import type {
+  ApiResponse,
+  Product,
+  ProductColor,
+  ProductMaterial,
+} from "../types";
+
+const fallbackProductImage = "/models/wooden-table-set.png";
 
 export interface ProductFilters {
   category?: string;
@@ -18,89 +24,186 @@ function normalize(value: string) {
   return value.trim().toLowerCase();
 }
 
+export type ApiProduct = Omit<
+  Partial<Product>,
+  "category" | "colors" | "dimensions" | "images" | "materials"
+> & {
+  category?: string | { id?: string; name?: string; slug?: string };
+  colors?: ProductColor[];
+  dimensions?: {
+    d?: number;
+    depth?: number;
+    h?: number;
+    height?: number;
+    unit?: string;
+    w?: number;
+    width?: number;
+  };
+  hasArSupport?: boolean;
+  images?: Array<string | { url?: string }>;
+  materials?: ProductMaterial[] | string[];
+  posterUrl?: string;
+  variants?: Array<{
+    hexColor?: string;
+    id?: string;
+    name?: string;
+    priceAddon?: number;
+    type?: string;
+  }>;
+};
+
+function isProductMaterial(value: unknown): value is ProductMaterial {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    "name" in value &&
+    "surcharge" in value
+  );
+}
+
+function normalizeCategory(category: ApiProduct["category"]) {
+  if (!category) return "other";
+  if (typeof category === "string") return category;
+  return category.slug ?? category.id ?? category.name ?? "other";
+}
+
+function normalizeColors(product: ApiProduct): ProductColor[] {
+  if (product.colors?.length) return product.colors;
+
+  const colors = new Map<string, ProductColor>();
+  product.variants?.forEach((variant) => {
+    if (!variant.hexColor) return;
+    const id = variant.id ?? variant.name ?? variant.hexColor;
+    colors.set(id, {
+      hex: variant.hexColor,
+      id,
+      name: variant.name ?? "Màu mặc định",
+    });
+  });
+
+  const normalizedColors = [...colors.values()];
+  return normalizedColors.length
+    ? normalizedColors
+    : [{ hex: "#d6d0c4", id: "default", name: "Mặc định" }];
+}
+
+function normalizeMaterials(product: ApiProduct): ProductMaterial[] {
+  if (!product.materials?.length) {
+    return [{ id: "default", name: "Tiêu chuẩn", surcharge: 0 }];
+  }
+
+  return product.materials.map((material) => {
+    if (isProductMaterial(material)) return material;
+    return {
+      id: normalize(material),
+      name: material,
+      surcharge: 0,
+    };
+  });
+}
+
+function normalizeImages(product: ApiProduct) {
+  const images =
+    product.images
+      ?.map((image) => (typeof image === "string" ? image : image.url))
+      .filter((image): image is string => Boolean(image)) ?? [];
+
+  return images.length
+    ? images
+    : [product.thumbnailUrl, product.posterUrl].filter(
+        (image): image is string => Boolean(image),
+      );
+}
+
+export function normalizeProduct(product: ApiProduct): Product {
+  const category =
+    typeof product.category === "object" ? product.category : undefined;
+  const images = normalizeImages(product);
+  const dimensions = product.dimensions ?? {};
+  const colors = normalizeColors(product);
+  const materials = normalizeMaterials(product);
+
+  return {
+    ...product,
+    arSupported:
+      product.arSupported ?? product.hasArSupport ?? Boolean(product.modelUrl),
+    basePrice: product.basePrice ?? product.finalPrice ?? 0,
+    category: normalizeCategory(product.category),
+    collection: product.collection ?? category?.name ?? "TrySpace",
+    colors,
+    dimensions: {
+      d: dimensions.d ?? dimensions.depth ?? 0,
+      h: dimensions.h ?? dimensions.height ?? 0,
+      unit: dimensions.unit,
+      w: dimensions.w ?? dimensions.width ?? 0,
+    },
+    id: product.id ?? "",
+    images: images.length ? images : [fallbackProductImage],
+    inStock: product.inStock ?? true,
+    materials,
+    name: product.name ?? "Sản phẩm",
+    rating: product.rating ?? product.averageRating ?? 0,
+    reviewCount: product.reviewCount ?? product.totalReviews ?? 0,
+    tags: product.tags ?? [],
+  };
+}
+
+function toBackendParams(filters: ProductFilters) {
+  const sortMap = {
+    newest: { sortBy: "createdAt", sortOrder: "desc" },
+    popular: { sortBy: "popular", sortOrder: "desc" },
+    price_asc: { sortBy: "price", sortOrder: "asc" },
+    price_desc: { sortBy: "price", sortOrder: "desc" },
+  } as const;
+  const sort = sortMap[filters.sort ?? "newest"];
+
+  return {
+    categorySlug:
+      filters.category && filters.category !== "all"
+        ? filters.category
+        : undefined,
+    color: filters.colors?.[0],
+    limit: filters.limit,
+    material: filters.materials?.[0],
+    maxPrice: filters.maxPrice,
+    minPrice: filters.minPrice,
+    page: filters.page,
+    search: filters.query || undefined,
+    sortBy: sort.sortBy,
+    sortOrder: sort.sortOrder,
+  };
+}
+
 export const productApi = {
   async getAll(filters: ProductFilters = {}): Promise<ApiResponse<Product[]>> {
-    if (useMockApi) {
-      await mockDelay();
-      let result = [...(mockProducts as Product[])];
-      const query = filters.query ? normalize(filters.query) : "";
-
-      if (filters.category && filters.category !== "all") {
-        result = result.filter((product) => product.category === filters.category);
-      }
-
-      if (query) {
-        result = result.filter(
-          (product) =>
-            normalize(product.name).includes(query) ||
-            normalize(product.collection).includes(query) ||
-            product.tags.some((tag) => normalize(tag).includes(query)),
-        );
-      }
-
-      if (filters.minPrice) {
-        result = result.filter(
-          (product) => product.basePrice >= Number(filters.minPrice),
-        );
-      }
-
-      if (filters.maxPrice) {
-        result = result.filter(
-          (product) => product.basePrice <= Number(filters.maxPrice),
-        );
-      }
-
-      if (filters.colors?.length) {
-        result = result.filter((product) =>
-          product.colors.some((color) => filters.colors?.includes(color.id)),
-        );
-      }
-
-      if (filters.materials?.length) {
-        result = result.filter((product) =>
-          product.materials.some((material) =>
-            filters.materials?.includes(material.id),
-          ),
-        );
-      }
-
-      if (filters.sort === "price_asc") {
-        result.sort((left, right) => left.basePrice - right.basePrice);
-      }
-
-      if (filters.sort === "price_desc") {
-        result.sort((left, right) => right.basePrice - left.basePrice);
-      }
-
-      if (filters.sort === "popular") {
-        result.sort((left, right) => right.reviewCount - left.reviewCount);
-      }
-
-      return {
-        data: result,
-        pagination: { limit: result.length, page: 1, total: result.length },
-      };
-    }
-
-    const response = await apiClient.get<ApiResponse<Product[]>>("/products", {
-      params: filters,
+    const response = await apiClient.get<{
+      data: ApiProduct[];
+      meta: { limit: number; page: number; total: number; totalPages: number };
+      success: boolean;
+    }>("/products", {
+      params: toBackendParams(filters),
     });
-    return response.data;
+    const totalPages = response.data.meta.totalPages;
+    const page = response.data.meta.page;
+
+    return {
+      data: response.data.data.map((product) => normalizeProduct(product)),
+      pagination: {
+        limit: response.data.meta.limit,
+        page,
+        total: response.data.meta.total,
+        totalPages,
+        hasNextPage: totalPages > page,
+        hasPreviousPage: page > 1,
+      },
+    };
   },
 
   async getById(id: string): Promise<ApiResponse<Product>> {
-    if (useMockApi) {
-      await mockDelay();
-      const product = (mockProducts as Product[]).find((item) => item.id === id);
-
-      if (!product) {
-        throw { response: { data: { message: "Sản phẩm không tồn tại" } } };
-      }
-
-      return { data: product };
-    }
-
-    const response = await apiClient.get<ApiResponse<Product>>(`/products/${id}`);
-    return response.data;
+    const response = await apiClient.get<{ data: ApiProduct; success: boolean }>(
+      `/products/${id}`,
+    );
+    return { data: normalizeProduct(response.data.data) };
   },
 };

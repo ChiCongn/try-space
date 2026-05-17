@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { logger } from "../../utils/logger";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -16,7 +17,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("TrySpace route crash", error, info);
+    logger.error(
+      "react.error_boundary",
+      { componentStack: info.componentStack },
+      error,
+    );
   }
 
   render() {
