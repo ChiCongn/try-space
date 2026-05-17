@@ -1,12 +1,43 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
+import { toast } from "sonner";
 import { ProductCard } from "../components/product/ProductCard";
+import { wishlistApi } from "../services/wishlist.api";
 import { useAuthStore } from "../store/authStore";
 import { useWishlistStore } from "../store/wishlistStore";
+import { getErrorMessages } from "../utils/errors";
 
 export function WishlistPage() {
   const user = useAuthStore((state) => state.user);
   const items = useWishlistStore((state) => state.items);
+  const setWishlistItems = useWishlistStore((state) => state.setItems);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let live = true;
+
+    wishlistApi
+      .getMine()
+      .then((response) => {
+        if (live) setWishlistItems(response.data);
+      })
+      .catch((caught) => {
+        if (!live) return;
+
+        const messages = getErrorMessages(caught, "Không thể tải yêu thích.");
+        toast.error("Không thể tải yêu thích", {
+          description: messages.join("\n"),
+        });
+      })
+      .finally(() => {
+        if (live) setIsLoading(false);
+      });
+
+    return () => {
+      live = false;
+    };
+  }, [setWishlistItems]);
 
   return (
     <section className="wishlist-page">
@@ -22,7 +53,11 @@ export function WishlistPage() {
         </div>
       ) : null}
 
-      {items.length > 0 ? (
+      {isLoading ? (
+        <div className="empty-panel page-empty">
+          <p>Đang tải danh sách yêu thích...</p>
+        </div>
+      ) : items.length > 0 ? (
         <div className="product-grid-app">
           {items.map((item) => (
             <ProductCard key={item.id} product={item.product} />

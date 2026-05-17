@@ -2,8 +2,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { productApi, type ProductFilters } from "../services/product.api";
 import { ProductCard } from "../components/product/ProductCard";
+import { getErrorMessages } from "../utils/errors";
 import type { Product } from "../types";
 
 const categories = [
@@ -25,6 +27,7 @@ const sorts: Array<{ label: string; value: ProductFilters["sort"] }> = [
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -60,7 +63,22 @@ export function CatalogPage() {
       setIsLoading(true);
       try {
         const response = await productApi.getAll(filters);
-        if (isMounted) setProducts(response.data);
+        if (isMounted) {
+          setError("");
+          setProducts(response.data);
+        }
+      } catch (caught) {
+        if (isMounted) {
+          const messages = getErrorMessages(
+            caught,
+            "Không thể tải sản phẩm. Vui lòng kiểm tra backend hoặc thử lại sau.",
+          );
+          setProducts([]);
+          setError(messages.join("\n"));
+          toast.error("Không thể tải sản phẩm", {
+            description: messages.join("\n"),
+          });
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -270,6 +288,14 @@ export function CatalogPage() {
               {Array.from({ length: 8 }).map((_, i) => (
                 <div className="cv2-skeleton" key={i} aria-hidden />
               ))}
+            </div>
+          ) : error ? (
+            <div className="cv2-empty">
+              <span className="cv2-empty__icon">!</span>
+              <p>{error}</p>
+              <button type="button" onClick={clearFilters}>
+                Xoá bộ lọc
+              </button>
             </div>
           ) : products.length > 0 ? (
             <div className="cv2-grid">

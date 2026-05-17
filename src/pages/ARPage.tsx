@@ -15,6 +15,7 @@ import { ThreeViewer } from "../components/ar/ThreeViewer";
 import { useARSupport } from "../hooks/useARSupport";
 import { productApi } from "../services/product.api";
 import { formatVnd } from "../utils/formatPrice";
+import { getErrorMessages } from "../utils/errors";
 import { useArStore } from "../store/arStore";
 import { useCartStore } from "../store/cartStore";
 import { useDesignStore } from "../store/designStore";
@@ -100,6 +101,18 @@ export function ARPage() {
             searchParams.get("material") ?? response.data.materials[0]?.id ?? "",
           );
         }
+      })
+      .catch((caught) => {
+        if (!isMounted) return;
+
+        const messages = getErrorMessages(
+          caught,
+          "Không thể tải sản phẩm AR.",
+        );
+        setProduct(null);
+        toast.error("Không thể tải sản phẩm AR", {
+          description: messages.join("\n"),
+        });
       })
       .finally(() => {
         if (isMounted) {
@@ -211,11 +224,15 @@ export function ARPage() {
         description: "Quét mặt sàn chậm để đặt sản phẩm.",
       });
       setArStoreStatus("active");
-    } catch {
+    } catch (caught) {
       setArStatus("failed");
       setArStoreStatus("error");
+      const messages = getErrorMessages(
+        caught,
+        "Vui lòng thử lại hoặc dùng viewer 3D.",
+      );
       toast.error("Không thể mở AR", {
-        description: "Vui lòng thử lại hoặc dùng viewer 3D.",
+        description: messages.join("\n"),
       });
     } finally {
       setIsLaunchingAR(false);

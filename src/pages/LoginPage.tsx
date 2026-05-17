@@ -6,6 +6,7 @@ import { z } from "zod";
 import { authApi } from "../services/auth.api";
 import { useAuthStore } from "../store/authStore";
 import type { LoginPayload } from "../types";
+import { getErrorMessages } from "../utils/errors";
 
 const schema = z.object({
   email: z.string().email("Email không hợp lệ"),
@@ -14,7 +15,7 @@ const schema = z.object({
 
 export function LoginPage() {
   const { handleSubmit, register } = useForm<LoginPayload>({
-    defaultValues: { email: "minh@tryspace.app", password: "password123" },
+    defaultValues: { email: "acc01@gmail.com", password: "Acc01@gmail" },
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +27,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/", { replace: true });
+      navigate("/catalog", { replace: true });
     }
   }, [isLoggedIn, navigate]);
 
@@ -54,12 +55,10 @@ export function LoginPage() {
       toast.success("Đăng nhập thành công");
       navigate((location.state as { from?: string } | null)?.from ?? "/");
     } catch (caught) {
-      const message =
-        (caught as { response?: { data?: { message?: string } } }).response
-          ?.data?.message ?? "Đăng nhập thất bại";
-      setError(message);
+      const messages = getErrorMessages(caught, "Đăng nhập thất bại");
+      setError(messages[0] ?? "Đăng nhập thất bại");
       toast.error("Không thể đăng nhập", {
-        description: message,
+        description: messages.join("\n"),
       });
     } finally {
       setIsLoading(false);

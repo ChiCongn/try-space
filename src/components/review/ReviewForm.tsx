@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { reviewApi } from "../../services/review.api";
 import type { Review } from "../../types";
+import { getErrorMessages } from "../../utils/errors";
 import { reviewFormSchema } from "../../utils/schemas";
 import { RatingInput } from "./RatingInput";
 
@@ -34,6 +35,11 @@ export function ReviewForm({ onCreated, productId }: ReviewFormProps) {
       setRating(5);
       setTitle("");
       toast.success("Đã gửi đánh giá");
+    } catch (caught) {
+      const messages = getErrorMessages(caught, "Gửi đánh giá thất bại.");
+      toast.error("Không thể gửi đánh giá", {
+        description: messages.join("\n"),
+      });
     } finally {
       setIsSubmitting(false);
     }

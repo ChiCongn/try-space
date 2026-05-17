@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { productApi } from "../../services/product.api";
 import type { Product } from "../../types";
+import { getErrorMessages } from "../../utils/errors";
 import { ProductCard } from "./ProductCard";
 
 interface RelatedProductsProps {
@@ -18,7 +20,18 @@ export function RelatedProducts({ product }: RelatedProductsProps) {
         if (!live) return;
         setItems(response.data.filter((item) => item.id !== product.id).slice(0, 4));
       })
-      .catch(() => setItems([]));
+      .catch((caught) => {
+        if (!live) return;
+
+        const messages = getErrorMessages(
+          caught,
+          "Không thể tải sản phẩm liên quan.",
+        );
+        setItems([]);
+        toast.error("Không thể tải sản phẩm liên quan", {
+          description: messages.join("\n"),
+        });
+      });
 
     return () => {
       live = false;

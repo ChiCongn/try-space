@@ -1,6 +1,8 @@
 import { ThumbsUp } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { reviewApi } from "../../services/review.api";
+import { getErrorMessages } from "../../utils/errors";
 
 interface HelpfulButtonProps {
   count: number;
@@ -15,9 +17,13 @@ export function HelpfulButton({ count, reviewId }: HelpfulButtonProps) {
     if (clicked) return;
     setClicked(true);
     setHelpfulCount((value) => value + 1);
-    await reviewApi.markHelpful(reviewId).catch(() => {
+    await reviewApi.markHelpful(reviewId).catch((caught) => {
+      const messages = getErrorMessages(caught, "Không thể đánh dấu hữu ích.");
       setClicked(false);
       setHelpfulCount((value) => value - 1);
+      toast.error("Không thể đánh dấu hữu ích", {
+        description: messages.join("\n"),
+      });
     });
   }
 
