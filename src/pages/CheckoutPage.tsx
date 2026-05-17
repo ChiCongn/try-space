@@ -3,8 +3,10 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
+import { routeTo } from "../constants/routes";
 import { orderApi } from "../services/order.api";
 import { formatVnd } from "../utils/formatPrice";
+import { getErrorMessages } from "../utils/errors";
 import { useCartStore } from "../store/cartStore";
 import type { Address, CreateOrderPayload } from "../types";
 
@@ -52,20 +54,36 @@ export function CheckoutPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<"cod">("cod");
+  const [hasCompletedOrder, setHasCompletedOrder] = useState(false);
   const hasRedirectedEmptyCart = useRef(false);
 
   useEffect(() => {
-    if (items.length > 0 || hasRedirectedEmptyCart.current) return;
+    if (
+      items.length > 0 ||
+      isSubmitting ||
+      hasCompletedOrder ||
+      hasRedirectedEmptyCart.current
+    ) {
+      return;
+    }
 
     hasRedirectedEmptyCart.current = true;
     toast.warning("Giỏ hàng đang trống", {
       description: "Vui lòng chọn sản phẩm trước khi thanh toán.",
     });
     navigate("/cart", { replace: true });
-  }, [items.length, navigate]);
+  }, [hasCompletedOrder, isSubmitting, items.length, navigate]);
 
   const onSubmit = async (data: Address) => {
     clearErrors();
+
+    if (items.length === 0) {
+      toast.warning("Giỏ hàng đang trống", {
+        description: "Vui lòng chọn sản phẩm trước khi thanh toán.",
+      });
+      navigate("/cart", { replace: true });
+      return;
+    }
 
     const parsed = addressSchema.safeParse(data);
     if (!parsed.success) {
@@ -98,16 +116,17 @@ export function CheckoutPage() {
       };
 
       const response = await orderApi.createOrder(payload);
+      setHasCompletedOrder(true);
       clearCart();
       toast.success("Đặt hàng thành công!", {
         description: `Mã đơn hàng: ${response.data.id}`,
       });
-      navigate(`/order-success/${response.data.id}`, { replace: true });
+      navigate(routeTo.orderSuccess(response.data.id), { replace: true });
     } catch (caught) {
-      const message =
-        (caught as { response?: { data?: { message?: string } } }).response
-          ?.data?.message ?? "Đặt hàng thất bại. Vui lòng thử lại.";
-      toast.error(message);
+      const messages = getErrorMessages(caught, "Đặt hàng thất bại. Vui lòng thử lại.");
+      toast.error("Không thể đặt hàng", {
+        description: messages.join("\n"),
+      });
     } finally {
       setIsSubmitting(false);
     }
