@@ -6,10 +6,11 @@ import { getErrorMessages } from "../../utils/errors";
 
 interface HelpfulButtonProps {
   count: number;
+  productId: string;
   reviewId: string;
 }
 
-export function HelpfulButton({ count, reviewId }: HelpfulButtonProps) {
+export function HelpfulButton({ count, productId, reviewId }: HelpfulButtonProps) {
   const [helpfulCount, setHelpfulCount] = useState(count);
   const [clicked, setClicked] = useState(false);
 
@@ -17,7 +18,7 @@ export function HelpfulButton({ count, reviewId }: HelpfulButtonProps) {
     if (clicked) return;
     setClicked(true);
     setHelpfulCount((value) => value + 1);
-    await reviewApi.markHelpful(reviewId).catch((caught) => {
+    await reviewApi.markHelpful(productId, reviewId).catch((caught) => {
       const messages = getErrorMessages(caught, "Không thể đánh dấu hữu ích.");
       setClicked(false);
       setHelpfulCount((value) => value - 1);

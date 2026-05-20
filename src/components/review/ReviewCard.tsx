@@ -19,7 +19,11 @@ export function ReviewCard({ review }: ReviewCardProps) {
       </header>
       <h3>{review.title}</h3>
       <p>{review.content}</p>
-      <HelpfulButton count={review.helpfulCount} reviewId={review.id} />
+      <HelpfulButton
+        count={review.helpfulCount}
+        productId={review.productId}
+        reviewId={review.id}
+      />
     </article>
   );
 }
