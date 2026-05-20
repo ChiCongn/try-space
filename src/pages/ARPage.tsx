@@ -290,6 +290,14 @@ export function ARPage() {
     setModelMeasurement({ dimensions, src: product.modelUrl });
   }
 
+  const arButtonLabel = isLaunchingAR
+    ? "Đang mở camera..."
+    : modelStatus === "loading"
+      ? "Đang tải model 3D..."
+    : modelStatus === "error"
+      ? "Model 3D bị lỗi"
+      : "Mở camera AR";
+
   if (isLoading) {
     return <div className="ar-page">Đang mở AR...</div>;
   }
@@ -327,6 +335,20 @@ export function ARPage() {
           <ThreeViewer color={selectedColor.hex} />
         )}
         {arStatus === "session-started" ? <PlaneDetector /> : null}
+      </div>
+
+      <div className="ar-floating-actions" aria-label="Tác vụ AR chính">
+        <button
+          className="ar-floating-actions__primary"
+          disabled={
+            isLaunchingAR || !product.modelUrl || modelStatus === "error"
+          }
+          type="button"
+          onClick={handleStartAR}
+        >
+          <ScanLine size={19} />
+          {arButtonLabel}
+        </button>
       </div>
 
       <aside className="ar-bottom-sheet" aria-label="Điều khiển AR">
@@ -370,21 +392,6 @@ export function ARPage() {
         />
 
         <div className="ar-actions">
-          <button
-            className="ar-actions__primary"
-            disabled={
-              isLaunchingAR || !product.modelUrl || modelStatus === "error"
-            }
-            type="button"
-            onClick={handleStartAR}
-          >
-            <ScanLine size={18} />
-            {isLaunchingAR
-              ? "Đang mở..."
-              : modelStatus === "loading"
-                ? "Đang tải model..."
-                : "Mở camera AR"}
-          </button>
           <button type="button" onClick={handleAddToCart}>
             <ShoppingBag size={18} />
             Thêm giỏ
