@@ -62,8 +62,4 @@ export const authApi = {
     );
     return { data: normalizeUser(response.data.data) };
   },
-
-  async logout(): Promise<void> {
-    await apiClient.post("/auth/logout");
-  },
 };

@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
-import { toast } from "sonner";
 import { ProductCard } from "../components/product/ProductCard";
 import { wishlistApi } from "../services/wishlist.api";
 import { useAuthStore } from "../store/authStore";
 import { useWishlistStore } from "../store/wishlistStore";
-import { getErrorMessages } from "../utils/errors";
 
 export function WishlistPage() {
   const user = useAuthStore((state) => state.user);
@@ -22,13 +20,8 @@ export function WishlistPage() {
       .then((response) => {
         if (live) setWishlistItems(response.data);
       })
-      .catch((caught) => {
+      .catch(() => {
         if (!live) return;
-
-        const messages = getErrorMessages(caught, "Không thể tải yêu thích.");
-        toast.error("Không thể tải yêu thích", {
-          description: messages.join("\n"),
-        });
       })
       .finally(() => {
         if (live) setIsLoading(false);

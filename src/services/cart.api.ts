@@ -22,11 +22,6 @@ function toBackendCartItems(items: CartItem[]) {
 }
 
 export const cartApi = {
-  async getCart(): Promise<ApiResponse<CartItem[]>> {
-    const response = await apiClient.get<ApiResponse<CartItem[]>>("/cart");
-    return response.data;
-  },
-
   async syncCart(items: CartItem[]): Promise<ApiResponse<CartItem[]>> {
     const response = await apiClient.put<ApiResponse<CartItem[]>>("/cart", {
       items: toBackendCartItems(items),
