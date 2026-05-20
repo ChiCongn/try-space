@@ -49,7 +49,7 @@ export function MobileNav() {
         className={({ isActive }) =>
           `bnav__ar ${isActive ? "bnav__ar--active" : ""}`
         }
-        to="/ar/p001"
+        to="/ar/ghe-eames-replica"
         aria-label="Xem AR"
       >
         <span className="bnav__ar-ring" aria-hidden />

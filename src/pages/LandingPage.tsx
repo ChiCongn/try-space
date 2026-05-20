@@ -48,7 +48,7 @@ export function LandingPage() {
             <Link className="primary-link" to="/catalog">
               Khám phá ngay <ArrowRight size={17} />
             </Link>
-            <Link className="ghost-link" to="/ar/p001">
+            <Link className="ghost-link" to="/ar/ghe-eames-replica">
               Xem demo
             </Link>
           </motion.div>

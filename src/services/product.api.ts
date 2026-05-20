@@ -8,6 +8,44 @@ import type {
 
 const fallbackProductImage = "/models/wooden-table-set.png";
 
+const fallbackProducts: Product[] = [
+  {
+    arSupported: true,
+    basePrice: 4200000,
+    category: "ghe",
+    collection: "Classic Icons",
+    colors: [
+      { hex: "#c9a882", id: "c1", name: "Be da" },
+      { hex: "#1c1c1c", id: "c2", name: "Đen da" },
+      { hex: "#8b4513", id: "c3", name: "Cognac" },
+    ],
+    dimensions: { d: 84, h: 85, w: 83 },
+    id: "ghe-eames-replica",
+    images: ["/models/fallback/sheen-chair.jpg"],
+    inStock: true,
+    materials: [
+      { id: "m1", name: "Da thật", surcharge: 0 },
+      { id: "m2", name: "Da Italy cao cấp", surcharge: 800000 },
+    ],
+    modelUrl: "/models/fallback/sheen-chair.glb",
+    name: "Ghế Eames Lounge",
+    rating: 4.9,
+    reviewCount: 89,
+    slug: "ghe-eames-replica",
+    tags: ["classic", "leather", "lounge", "chair", "ghe"],
+  },
+];
+
+const fallbackProductAliases = new Map(
+  fallbackProducts.flatMap((product) => [
+    [product.id, product],
+    [product.slug ?? product.id, product],
+    ["ghe-eames-lounge", product],
+    ["p001", product],
+    ["p002", product],
+  ]),
+);
+
 export interface ProductFilters {
   category?: string;
   minPrice?: number;
@@ -184,35 +222,104 @@ function toBackendParams(filters: ProductFilters) {
   };
 }
 
+function matchesText(product: Product, query: string) {
+  const normalizedQuery = normalize(query);
+  if (!normalizedQuery) return true;
+
+  return [
+    product.name,
+    product.collection,
+    product.category,
+    product.tags.join(" "),
+  ].some((value) => normalize(value).includes(normalizedQuery));
+}
+
+function matchesCategory(product: Product, category?: string) {
+  if (!category || category === "all") return true;
+  const normalizedCategory = categoryAliases[category] ?? category;
+  return product.category === normalizedCategory;
+}
+
+function fallbackProductList(filters: ProductFilters = {}): ApiResponse<Product[]> {
+  const page = Math.max(1, filters.page ?? 1);
+  const limit = Math.max(1, filters.limit ?? fallbackProducts.length);
+  const sortedProducts = [...fallbackProducts]
+    .filter((product) => matchesCategory(product, filters.category))
+    .filter((product) => matchesText(product, filters.query ?? ""))
+    .filter((product) =>
+      filters.minPrice === undefined ? true : product.basePrice >= filters.minPrice,
+    )
+    .filter((product) =>
+      filters.maxPrice === undefined ? true : product.basePrice <= filters.maxPrice,
+    )
+    .sort((left, right) => {
+      if (filters.sort === "price_asc") return left.basePrice - right.basePrice;
+      if (filters.sort === "price_desc") return right.basePrice - left.basePrice;
+      return 0;
+    });
+  const total = sortedProducts.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const start = (page - 1) * limit;
+
+  return {
+    data: sortedProducts.slice(start, start + limit),
+    pagination: {
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+      limit,
+      page,
+      total,
+      totalPages,
+    },
+  };
+}
+
+function getFallbackProduct(id: string) {
+  return fallbackProductAliases.get(id);
+}
+
 export const productApi = {
   async getAll(filters: ProductFilters = {}): Promise<ApiResponse<Product[]>> {
-    const response = await apiClient.get<{
-      data: ApiProduct[];
-      meta: { limit: number; page: number; total: number; totalPages: number };
-      success: boolean;
-    }>("/products", {
-      params: toBackendParams(filters),
-    });
-    const totalPages = response.data.meta.totalPages;
-    const page = response.data.meta.page;
+    try {
+      const response = await apiClient.get<{
+        data: ApiProduct[];
+        meta: { limit: number; page: number; total: number; totalPages: number };
+        success: boolean;
+      }>("/products", {
+        params: toBackendParams(filters),
+      });
+      const totalPages = response.data.meta.totalPages;
+      const page = response.data.meta.page;
 
-    return {
-      data: response.data.data.map((product) => normalizeProduct(product)),
-      pagination: {
-        limit: response.data.meta.limit,
-        page,
-        total: response.data.meta.total,
-        totalPages,
-        hasNextPage: totalPages > page,
-        hasPreviousPage: page > 1,
-      },
-    };
+      return {
+        data: response.data.data.map((product) => normalizeProduct(product)),
+        pagination: {
+          limit: response.data.meta.limit,
+          page,
+          total: response.data.meta.total,
+          totalPages,
+          hasNextPage: totalPages > page,
+          hasPreviousPage: page > 1,
+        },
+      };
+    } catch {
+      return fallbackProductList(filters);
+    }
   },
 
   async getById(id: string): Promise<ApiResponse<Product>> {
-    const response = await apiClient.get<{ data: ApiProduct; success: boolean }>(
-      `/products/${id}`,
-    );
-    return { data: normalizeProduct(response.data.data) };
+    try {
+      const response = await apiClient.get<{ data: ApiProduct; success: boolean }>(
+        `/products/${id}`,
+      );
+      return { data: normalizeProduct(response.data.data) };
+    } catch (caught) {
+      const fallbackProduct = getFallbackProduct(id);
+      if (fallbackProduct) {
+        return { data: fallbackProduct };
+      }
+
+      throw caught;
+    }
   },
 };
