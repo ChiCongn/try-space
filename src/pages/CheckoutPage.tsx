@@ -29,6 +29,72 @@ const addressFieldLabels: Partial<Record<keyof Address, string>> = {
   ward: "phường/xã",
 };
 
+const provinceOptions = [
+  "Hà Nội",
+  "TP. Hồ Chí Minh",
+  "Đà Nẵng",
+  "Hải Phòng",
+  "Cần Thơ",
+  "Bắc Ninh",
+  "Quảng Ninh",
+  "Thanh Hóa",
+  "Nghệ An",
+  "Thừa Thiên Huế",
+  "Khánh Hòa",
+  "Đồng Nai",
+  "Bình Dương",
+  "Bà Rịa - Vũng Tàu",
+  "Lâm Đồng",
+];
+
+const hanoiDistrictOptions = [
+  "Quận Ba Đình",
+  "Quận Hoàn Kiếm",
+  "Quận Tây Hồ",
+  "Quận Long Biên",
+  "Quận Cầu Giấy",
+  "Quận Đống Đa",
+  "Quận Hai Bà Trưng",
+  "Quận Hoàng Mai",
+  "Quận Thanh Xuân",
+  "Quận Nam Từ Liêm",
+  "Quận Bắc Từ Liêm",
+  "Quận Hà Đông",
+  "Huyện Thanh Trì",
+  "Huyện Gia Lâm",
+  "Huyện Đông Anh",
+  "Huyện Sóc Sơn",
+  "Huyện Hoài Đức",
+  "Huyện Quốc Oai",
+  "Huyện Thạch Thất",
+  "Huyện Chương Mỹ",
+  "Huyện Thanh Oai",
+  "Huyện Thường Tín",
+  "Huyện Phú Xuyên",
+  "Huyện Ứng Hòa",
+  "Huyện Mỹ Đức",
+  "Huyện Ba Vì",
+  "Huyện Phúc Thọ",
+  "Huyện Đan Phượng",
+  "Huyện Mê Linh",
+  "Thị xã Sơn Tây",
+];
+
+const hanoiWardOptions = [
+  "Phường Cửa Nam",
+  "Phường Hàng Bạc",
+  "Phường Hàng Bài",
+  "Phường Trúc Bạch",
+  "Phường Ngọc Hà",
+  "Phường Kim Mã",
+  "Phường Dịch Vọng",
+  "Phường Nghĩa Tân",
+  "Phường Trung Hòa",
+  "Phường Láng Hạ",
+  "Phường Khương Mai",
+  "Phường Văn Quán",
+];
+
 export function CheckoutPage() {
   const navigate = useNavigate();
   const items = useCartStore((state) => state.items);
@@ -168,9 +234,11 @@ export function CheckoutPage() {
                 Tỉnh/Thành phố
                 <select {...register("province")}>
                   <option value="">Chọn tỉnh/thành</option>
-                  <option value="Hà Nội">Hà Nội</option>
-                  <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                  <option value="Đà Nẵng">Đà Nẵng</option>
+                  {provinceOptions.map((province) => (
+                    <option key={province} value={province}>
+                      {province}
+                    </option>
+                  ))}
                 </select>
                 {errors.province && (
                   <span className="field-error">{errors.province.message}</span>
@@ -181,9 +249,11 @@ export function CheckoutPage() {
                 Quận/Huyện
                 <select {...register("district")}>
                   <option value="">Chọn quận/huyện</option>
-                  <option value="Quận 1">Quận 1</option>
-                  <option value="Quận 2">Quận 2</option>
-                  <option value="Quận 3">Quận 3</option>
+                  {hanoiDistrictOptions.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
                 </select>
                 {errors.district && (
                   <span className="field-error">{errors.district.message}</span>
@@ -194,8 +264,11 @@ export function CheckoutPage() {
                 Phường/Xã
                 <select {...register("ward")}>
                   <option value="">Chọn phường/xã</option>
-                  <option value="Phường Bến Nghé">Phường Bến Nghé</option>
-                  <option value="Phường Bến Thành">Phường Bến Thành</option>
+                  {hanoiWardOptions.map((ward) => (
+                    <option key={ward} value={ward}>
+                      {ward}
+                    </option>
+                  ))}
                 </select>
                 {errors.ward && (
                   <span className="field-error">{errors.ward.message}</span>
