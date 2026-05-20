@@ -24,6 +24,13 @@ function normalize(value: string) {
   return value.trim().toLowerCase();
 }
 
+const categoryAliases: Record<string, string> = {
+  chair: "ghe",
+  lamp: "den",
+  shelf: "ke",
+  table: "ban",
+};
+
 export type ApiProduct = Omit<
   Partial<Product>,
   "category" | "colors" | "dimensions" | "images" | "materials"
@@ -150,6 +157,11 @@ export function normalizeProduct(product: ApiProduct): Product {
 }
 
 function toBackendParams(filters: ProductFilters) {
+  const category =
+    filters.category && filters.category !== "all" ? filters.category : undefined;
+  const categorySlug = category
+    ? (categoryAliases[category] ?? category)
+    : undefined;
   const sortMap = {
     newest: { sortBy: "createdAt", sortOrder: "desc" },
     popular: { sortBy: "popular", sortOrder: "desc" },
@@ -159,10 +171,7 @@ function toBackendParams(filters: ProductFilters) {
   const sort = sortMap[filters.sort ?? "newest"];
 
   return {
-    categorySlug:
-      filters.category && filters.category !== "all"
-        ? filters.category
-        : undefined,
+    categorySlug,
     color: filters.colors?.[0],
     limit: filters.limit,
     material: filters.materials?.[0],

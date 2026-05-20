@@ -3,7 +3,7 @@ interface ProductFilterProps {
   onCategoryChange: (category: string) => void;
 }
 
-const categories = ["all", "sofa", "chair", "table", "shelf", "lamp", "other"];
+const categories = ["all", "sofa", "ghe", "ban", "ke", "den", "other"];
 
 export function ProductFilter({ category, onCategoryChange }: ProductFilterProps) {
   return (

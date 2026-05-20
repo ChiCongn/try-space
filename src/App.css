@@ -2618,6 +2618,12 @@ select:focus-visible {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.cv2-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem 0 0.25rem;
+}
+
 /* ── Skeleton ── */
 .cv2-skeleton {
   aspect-ratio: 3 / 4;
