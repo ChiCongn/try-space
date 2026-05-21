@@ -1,8 +1,10 @@
 import { Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import { EmptyState } from "../components/ui";
 import { orderApi } from "../services/order.api";
+import { getErrorMessages } from "../utils/errors";
 import { formatDateTime } from "../utils/formatDate";
 import { formatVnd } from "../utils/formatPrice";
 import type { Order } from "../types";
@@ -12,9 +14,20 @@ export function OrdersPage() {
 
   useEffect(() => {
     let live = true;
-    orderApi.getOrders().then((response) => {
-      if (live) setOrders(response.data);
-    });
+    orderApi
+      .getOrders()
+      .then((response) => {
+        if (live) setOrders(response.data);
+      })
+      .catch((caught) => {
+        if (!live) return;
+
+        const messages = getErrorMessages(caught, "Không thể tải đơn hàng.");
+        setOrders([]);
+        toast.error("Không thể tải đơn hàng", {
+          description: messages.join("\n"),
+        });
+      });
     return () => {
       live = false;
     };
@@ -41,7 +54,7 @@ export function OrdersPage() {
       ) : (
         <EmptyState
           action={<Link className="primary-link" to="/catalog">Mua sắm</Link>}
-          description="Các đơn hàng mock sẽ xuất hiện tại đây sau checkout."
+          description="Các đơn hàng từ backend sẽ xuất hiện tại đây sau checkout."
           icon={<Package size={34} />}
           title="Chưa có đơn hàng"
         />

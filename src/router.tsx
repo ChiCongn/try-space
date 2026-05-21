@@ -82,7 +82,7 @@ export const router = createBrowserRouter([
       { element: withSuspense(<ProductDetailPage />), path: ROUTES.PRODUCT },
       { element: withSuspense(<ARPage />), path: ROUTES.AR },
       { element: withSuspense(<SharedDesignPage />), path: ROUTES.SHARED_DESIGN },
-      { element: <Navigate replace to="/ar/p001" />, path: ROUTES.TRY },
+      { element: <Navigate replace to="/ar/ghe-eames-replica" />, path: ROUTES.TRY },
     ],
   },
   {

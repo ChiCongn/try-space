@@ -6,6 +6,7 @@ import { z } from "zod";
 import { authApi } from "../services/auth.api";
 import { useAuthStore } from "../store/authStore";
 import type { RegisterPayload } from "../types";
+import { getErrorMessages } from "../utils/errors";
 
 type RegisterForm = RegisterPayload & { confirmPassword: string };
 
@@ -13,7 +14,11 @@ const schema = z
   .object({
     confirmPassword: z.string(),
     email: z.string().email("Email không hợp lệ"),
-    name: z.string().min(2, "Tên tối thiểu 2 ký tự"),
+    name: z
+      .string()
+      .min(2, "Tên tối thiểu 2 ký tự")
+      .max(50, "Tên tối đa 50 ký tự")
+      .regex(/^[a-zA-ZÀ-ỹ\s-]+$/, "Tên hiển thị chỉ được chứa chữ cái, dấu cách và dấu gạch ngang"),
     password: z
       .string()
       .min(8, "Mật khẩu tối thiểu 8 ký tự")
@@ -28,7 +33,6 @@ const schema = z
 
 export function RegisterPage() {
   const { handleSubmit, register } = useForm<RegisterForm>();
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const setUser = useAuthStore((state) => state.setUser);
@@ -46,7 +50,6 @@ export function RegisterPage() {
 
     if (!parsed.success) {
       const message = parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ";
-      setError(message);
       toast.error("Không thể đăng ký", {
         description: message,
       });
@@ -55,7 +58,6 @@ export function RegisterPage() {
 
     try {
       setIsLoading(true);
-      setError("");
       const response = await authApi.register({
         email: parsed.data.email,
         name: parsed.data.name,
@@ -69,12 +71,9 @@ export function RegisterPage() {
       toast.success("Tạo tài khoản thành công");
       navigate("/");
     } catch (caught) {
-      const message =
-        (caught as { response?: { data?: { message?: string } } }).response
-          ?.data?.message ?? "Đăng ký thất bại";
-      setError(message);
+      const messages = getErrorMessages(caught, "Đăng ký thất bại");
       toast.error("Không thể đăng ký", {
-        description: message,
+        description: messages.join("\n"),
       });
     } finally {
       setIsLoading(false);
@@ -89,7 +88,6 @@ export function RegisterPage() {
       <form className="auth-card" onSubmit={handleSubmit(onSubmit)}>
         <span>Create account</span>
         <h1>Đăng ký</h1>
-        {error ? <div className="form-error">{error}</div> : null}
         <label>
           Tên hiển thị
           <input {...register("name")} />

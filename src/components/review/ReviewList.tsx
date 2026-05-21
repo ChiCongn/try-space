@@ -1,12 +1,35 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { reviewApi } from "../../services/review.api";
 import type { RatingSummary, Review } from "../../types";
+import { getErrorMessages } from "../../utils/errors";
 import { RatingDistribution } from "./RatingDistribution";
 import { ReviewCard } from "./ReviewCard";
 import { ReviewForm } from "./ReviewForm";
 
 interface ReviewListProps {
   productId: string;
+}
+
+function buildSummary(reviews: Review[]): RatingSummary {
+  const distribution: RatingSummary["distribution"] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+  reviews.forEach((review) => {
+    const rating = Math.min(5, Math.max(1, Math.round(review.rating))) as
+      | 1
+      | 2
+      | 3
+      | 4
+      | 5;
+    distribution[rating] += 1;
+  });
+
+  const total = reviews.length;
+  const average = total
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / total
+    : 0;
+
+  return { average, distribution, total };
 }
 
 export function ReviewList({ productId }: ReviewListProps) {
@@ -16,14 +39,27 @@ export function ReviewList({ productId }: ReviewListProps) {
   useEffect(() => {
     let live = true;
 
-    Promise.all([
-      reviewApi.getByProduct(productId),
-      reviewApi.getSummary(productId),
-    ]).then(([reviewResponse, summaryResponse]) => {
-      if (!live) return;
-      setReviews(reviewResponse.data);
-      setSummary(summaryResponse.data);
-    });
+    async function loadReviews() {
+      try {
+        const reviewResponse = await reviewApi.getByProduct(productId);
+        if (!live) return;
+
+        setReviews(reviewResponse.data);
+
+        setSummary(buildSummary(reviewResponse.data));
+      } catch (caught) {
+        if (!live) return;
+
+        const messages = getErrorMessages(caught, "Không thể tải đánh giá.");
+        setReviews([]);
+        setSummary(null);
+        toast.error("Không thể tải đánh giá", {
+          description: messages.join("\n"),
+        });
+      }
+    }
+
+    void loadReviews();
 
     return () => {
       live = false;

@@ -3,8 +3,10 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
+import { routeTo } from "../constants/routes";
 import { orderApi } from "../services/order.api";
 import { formatVnd } from "../utils/formatPrice";
+import { getErrorMessages } from "../utils/errors";
 import { useCartStore } from "../store/cartStore";
 import type { Address, CreateOrderPayload } from "../types";
 
@@ -26,6 +28,72 @@ const addressFieldLabels: Partial<Record<keyof Address, string>> = {
   street: "địa chỉ",
   ward: "phường/xã",
 };
+
+const provinceOptions = [
+  "Hà Nội",
+  "TP. Hồ Chí Minh",
+  "Đà Nẵng",
+  "Hải Phòng",
+  "Cần Thơ",
+  "Bắc Ninh",
+  "Quảng Ninh",
+  "Thanh Hóa",
+  "Nghệ An",
+  "Thừa Thiên Huế",
+  "Khánh Hòa",
+  "Đồng Nai",
+  "Bình Dương",
+  "Bà Rịa - Vũng Tàu",
+  "Lâm Đồng",
+];
+
+const hanoiDistrictOptions = [
+  "Quận Ba Đình",
+  "Quận Hoàn Kiếm",
+  "Quận Tây Hồ",
+  "Quận Long Biên",
+  "Quận Cầu Giấy",
+  "Quận Đống Đa",
+  "Quận Hai Bà Trưng",
+  "Quận Hoàng Mai",
+  "Quận Thanh Xuân",
+  "Quận Nam Từ Liêm",
+  "Quận Bắc Từ Liêm",
+  "Quận Hà Đông",
+  "Huyện Thanh Trì",
+  "Huyện Gia Lâm",
+  "Huyện Đông Anh",
+  "Huyện Sóc Sơn",
+  "Huyện Hoài Đức",
+  "Huyện Quốc Oai",
+  "Huyện Thạch Thất",
+  "Huyện Chương Mỹ",
+  "Huyện Thanh Oai",
+  "Huyện Thường Tín",
+  "Huyện Phú Xuyên",
+  "Huyện Ứng Hòa",
+  "Huyện Mỹ Đức",
+  "Huyện Ba Vì",
+  "Huyện Phúc Thọ",
+  "Huyện Đan Phượng",
+  "Huyện Mê Linh",
+  "Thị xã Sơn Tây",
+];
+
+const hanoiWardOptions = [
+  "Phường Cửa Nam",
+  "Phường Hàng Bạc",
+  "Phường Hàng Bài",
+  "Phường Trúc Bạch",
+  "Phường Ngọc Hà",
+  "Phường Kim Mã",
+  "Phường Dịch Vọng",
+  "Phường Nghĩa Tân",
+  "Phường Trung Hòa",
+  "Phường Láng Hạ",
+  "Phường Khương Mai",
+  "Phường Văn Quán",
+];
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -52,20 +120,36 @@ export function CheckoutPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<"cod">("cod");
-  //const hasRedirectedEmptyCart = useRef(false);
+  const [hasCompletedOrder, setHasCompletedOrder] = useState(false);
+  const hasRedirectedEmptyCart = useRef(false);
 
-//   useEffect(() => {
-//     if (items.length > 0 || hasRedirectedEmptyCart.current) return;
+  useEffect(() => {
+    if (
+      items.length > 0 ||
+      isSubmitting ||
+      hasCompletedOrder ||
+      hasRedirectedEmptyCart.current
+    ) {
+      return;
+    }
 
-//     hasRedirectedEmptyCart.current = true;
-//     toast.warning("Giỏ hàng đang trống", {
-//       description: "Vui lòng chọn sản phẩm trước khi thanh toán.",
-//     });
-//     navigate("/cart", { replace: true });
-//   }, [items.length, navigate]);
+    hasRedirectedEmptyCart.current = true;
+    toast.warning("Giỏ hàng đang trống", {
+      description: "Vui lòng chọn sản phẩm trước khi thanh toán.",
+    });
+    navigate("/cart", { replace: true });
+  }, [hasCompletedOrder, isSubmitting, items.length, navigate]);
 
   const onSubmit = async (data: Address) => {
     clearErrors();
+
+    if (items.length === 0) {
+      toast.warning("Giỏ hàng đang trống", {
+        description: "Vui lòng chọn sản phẩm trước khi thanh toán.",
+      });
+      navigate("/cart", { replace: true });
+      return;
+    }
 
     const parsed = addressSchema.safeParse(data);
     if (!parsed.success) {
@@ -98,16 +182,17 @@ export function CheckoutPage() {
       };
 
       const response = await orderApi.createOrder(payload);
+      setHasCompletedOrder(true);
       clearCart();
       toast.success("Đặt hàng thành công!", {
         description: `Mã đơn hàng: ${response.data.id}`,
       });
-      navigate(`/order-success/${response.data.id}`, { replace: true });
+      navigate(routeTo.orderSuccess(response.data.id), { replace: true });
     } catch (caught) {
-      const message =
-        (caught as { response?: { data?: { message?: string } } }).response
-          ?.data?.message ?? "Đặt hàng thất bại. Vui lòng thử lại.";
-      toast.error(message);
+      const messages = getErrorMessages(caught, "Đặt hàng thất bại. Vui lòng thử lại.");
+      toast.error("Không thể đặt hàng", {
+        description: messages.join("\n"),
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -149,9 +234,11 @@ export function CheckoutPage() {
                 Tỉnh/Thành phố
                 <select {...register("province")}>
                   <option value="">Chọn tỉnh/thành</option>
-                  <option value="Hà Nội">Hà Nội</option>
-                  <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                  <option value="Đà Nẵng">Đà Nẵng</option>
+                  {provinceOptions.map((province) => (
+                    <option key={province} value={province}>
+                      {province}
+                    </option>
+                  ))}
                 </select>
                 {errors.province && (
                   <span className="field-error">{errors.province.message}</span>
@@ -162,9 +249,11 @@ export function CheckoutPage() {
                 Quận/Huyện
                 <select {...register("district")}>
                   <option value="">Chọn quận/huyện</option>
-                  <option value="Quận 1">Quận 1</option>
-                  <option value="Quận 2">Quận 2</option>
-                  <option value="Quận 3">Quận 3</option>
+                  {hanoiDistrictOptions.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
                 </select>
                 {errors.district && (
                   <span className="field-error">{errors.district.message}</span>
@@ -175,8 +264,11 @@ export function CheckoutPage() {
                 Phường/Xã
                 <select {...register("ward")}>
                   <option value="">Chọn phường/xã</option>
-                  <option value="Phường Bến Nghé">Phường Bến Nghé</option>
-                  <option value="Phường Bến Thành">Phường Bến Thành</option>
+                  {hanoiWardOptions.map((ward) => (
+                    <option key={ward} value={ward}>
+                      {ward}
+                    </option>
+                  ))}
                 </select>
                 {errors.ward && (
                   <span className="field-error">{errors.ward.message}</span>

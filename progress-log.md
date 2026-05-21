@@ -1,6 +1,6 @@
 # TrySpace Progress Log
 
-Cap nhat: 2026-05-08
+Cap nhat: 2026-05-17
 
 Nguon doi chieu:
 - `docs/TrySpace_Frontend_Spec.md`
@@ -14,17 +14,17 @@ Quy uoc trang thai:
 
 ## Tong Quan
 
-- [~] MVP core "Kham pha -> Xem AR -> Tuy bien -> Luu -> Mua" da co duong di chinh: landing, catalog, product detail, AR page, cart, checkout mock.
-- [~] Kien truc dang la React + Vite + TypeScript + Zustand + mock API, nhung version va thu vien khac dac ta: React 19, React Router 7, Zustand 5, Tailwind 4 plugin; chua co TanStack React Query.
+- [~] MVP core "Kham pha -> Xem AR -> Tuy bien -> Luu -> Mua" da co duong di chinh: landing, catalog, product detail, AR page, cart, checkout qua backend API.
+- [~] Kien truc dang la React + Vite + TypeScript + Zustand + backend API service layer, nhung version va thu vien khac dac ta: React 19, React Router 7, Zustand 5, Tailwind 4 plugin; chua co TanStack React Query.
 - [~] AR da dung `@google/model-viewer`, co CTA mo AR tren dien thoai, fallback 3D, `arStore`, AR controls va save/share design session; screenshot moi co helper, chua co UI thumbnail production.
 - [~] PWA da co `manifest.webmanifest`, service worker custom, standalone config va cache co ban; chua cai `vite-plugin-pwa` va chua co icon PNG 192/512.
-- [x] Review, Orders, Designs, Shared Design, Account va ProtectedRoute da duoc trien khai voi mock/local data.
+- [x] Review, Orders, Designs, Shared Design, Account va ProtectedRoute da duoc trien khai voi backend services/local UI state.
 
 ## 1. Cau Truc Thu Muc
 
 - [x] Co nhom `src/components/ui`, `src/components/layout`, `src/components/product`, `src/components/ar`, `src/components/cart`, `src/pages`, `src/store`, `src/services`, `src/hooks`, `src/types`, `src/utils`, `src/constants`.
 - [~] Co public assets cho model: `public/models/wooden_table_set-1k.glb`, `public/models/wooden_table_set-4k.glb`, `public/models/wooden-table-set.png`.
-- [~] Du lieu san pham mock nam tai `src/assets/mock-data/products.json`.
+- [x] Du lieu san pham lay tu backend qua `product.api.ts`; file data tinh trong `src/assets` da bo.
 - [x] Prototype cu trong `src/features/products` da duoc dua ra `docs/archive/features-products`; `src/features` khong con nam trong source app.
 - [ ] Chua dung dung cau truc `apps/web/` nhu dac ta.
 - [x] Da co `src/types/product.types.ts` va cac file tach `api.types.ts`, `user.types.ts`, `order.types.ts`, `design.types.ts`, `review.types.ts`, `cart.types.ts`; core app types van re-export/giu trong `src/types/index.ts`.
@@ -120,10 +120,10 @@ Quy uoc trang thai:
 
 ### CheckoutPage
 
-- [x] Co checkout mock voi shipping address, COD, order summary.
+- [x] Co checkout voi shipping address, COD, order summary va create order qua backend.
 - [x] Co Zod validation va inline errors.
 - [x] Co popup/toast khi nhap thieu/sai, gio hang trong, thanh cong/that bai.
-- [x] Tao mock order qua `orderApi.createOrder`, clear cart, den OrderSuccess.
+- [x] Tao order qua `orderApi.createOrder`, clear cart, den OrderSuccess.
 - [~] Schema field khac spec (`recipientName`, `street`, `cod`) nhung dap ung flow tuong duong.
 - [~] Chua dung `@hookform/resolvers/zod`; dang parse Zod trong `onSubmit`.
 - [x] Co ProtectedRoute yeu cau dang nhap truoc checkout.
@@ -132,7 +132,7 @@ Quy uoc trang thai:
 
 - [x] Co LoginPage va RegisterPage.
 - [x] Co React Hook Form + Zod validation.
-- [x] Co mock auth API va persist auth state.
+- [x] Co auth API that va persist auth state.
 - [x] Co redirect khi da login.
 - [x] Co toast loi/thanh cong.
 - [x] Register password rule yeu cau chu hoa/chu thuong/so.
@@ -144,7 +144,7 @@ Quy uoc trang thai:
 
 - [x] Co WishlistPage va wishlist store persist.
 - [x] Product card co toggle wishlist.
-- [~] Wishlist hien la local-first, co `wishlist.api.ts` mock va ProtectedRoute; chua co backend sync that.
+- [~] Wishlist UI hien con local-first, co `wishlist.api.ts` goi backend va ProtectedRoute; chua wire day du mutation dong bo backend.
 - [x] ProductDetail `saveDesign()` mo modal va luu vao `designStore`; co design page/grid.
 - [x] Co DesignsPage.
 - [x] Co SharedDesignPage.
@@ -179,9 +179,9 @@ Quy uoc trang thai:
 - [x] Co axios client trong `src/services/api.ts`.
 - [x] Co request interceptor gan Bearer token.
 - [x] Co response interceptor refresh token khi 401 va retry request.
-- [x] Co mock API flag `VITE_USE_MOCK`.
-- [x] Co `product.api.ts` voi list/detail/filter/sort mock va real API fallback.
-- [x] Co `auth.api.ts` login/register/getMe/logout mock va real API fallback.
+- [x] Da bo flag fallback data gia; service layer mac dinh goi backend.
+- [x] Co `product.api.ts` voi list/detail/filter/sort qua backend.
+- [x] Co `auth.api.ts` login/register/getMe/logout qua backend.
 - [x] Co `cart.api.ts` get/sync cart.
 - [x] Co `order.api.ts` create/list/detail order.
 - [x] Base URL uu tien `VITE_API_BASE_URL` va fallback `http://localhost:4000/api/v1`.
@@ -192,7 +192,7 @@ Quy uoc trang thai:
 - [x] Co `wishlist.api.ts`.
 - [x] Co `search.api.ts`.
 - [x] Co `upload.api.ts`.
-- [~] Co hooks `useProducts`, `useProduct`, `useReviews` mock/local; chua dung React Query/mutations v5.
+- [~] Co hooks `useProducts`, `useProduct`, `useReviews`; chua dung React Query/mutations v5.
 
 ## 6. Component Specifications
 
@@ -295,7 +295,7 @@ Quy uoc trang thai:
 - [~] CartSheet chua co spinner overlay khi sync API.
 - [~] Image progressive blur-up chua co.
 - [x] Co page transition top bar/spinner qua Suspense fallback.
-- [~] Review co loading mock nhe, chua co skeleton rieng cho review.
+- [~] Review co loading nhe, chua co skeleton rieng cho review.
 
 ## 11. Responsive Behavior
 
@@ -324,7 +324,7 @@ Quy uoc trang thai:
 ## 13. Environment & Config
 
 - [x] Co `.env.example`.
-- [x] Co `VITE_API_URL` va `VITE_USE_MOCK`.
+- [x] Co `VITE_API_BASE_URL` cho backend API.
 - [x] Co Vite config voi React plugin va Tailwind plugin.
 - [~] `.env.example` co ca backend variables, chua tach web `.env.local`/production nhu spec.
 - [x] Da chuan hoa uu tien `VITE_API_BASE_URL`; bo duplicate `VITE_API_URL` trong `.env.example`.
@@ -370,7 +370,7 @@ Quy uoc trang thai:
 1. Fix lint errors hien tai de CI/local quality sach.
 2. Them `ProtectedRoute` va chuan hoa auth initialization/refresh flow.
 3. Chuan hoa routing theo spec: constants, NotFoundPage, Orders/Designs/Account/SharedDesign.
-4. Dua data fetching sang TanStack React Query hoac cap nhat spec neu du an co chu dich dung local mock API.
+4. Dua data fetching sang TanStack React Query va wire mutation backend cho local UI stores.
 5. Tach reusable components: EmptyState, Skeleton, Modal, ProductGrid, PriceDisplay, CartItem/CartSummary.
 6. Hoan thien AR session: `arStore`, ARControls, save/share design, screenshot thumbnail.
 7. Them PWA config va manifest de dat muc tieu Progressive Web App.

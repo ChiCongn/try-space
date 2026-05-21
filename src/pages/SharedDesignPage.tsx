@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { DesignViewer } from "../components/design/DesignViewer";
 import { designApi } from "../services/design.api";
+import { getErrorMessages } from "../utils/errors";
 import type { SavedDesign } from "../types";
 
 export function SharedDesignPage() {
@@ -11,9 +13,20 @@ export function SharedDesignPage() {
   useEffect(() => {
     if (!shareToken) return;
     let live = true;
-    designApi.getByShareToken(shareToken).then((response) => {
-      if (live) setDesign(response.data);
-    }).catch(() => setDesign(null));
+    designApi
+      .getByShareToken(shareToken)
+      .then((response) => {
+        if (live) setDesign(response.data);
+      })
+      .catch((caught) => {
+        if (!live) return;
+
+        const messages = getErrorMessages(caught, "Không thể tải thiết kế.");
+        setDesign(null);
+        toast.error("Không thể tải thiết kế", {
+          description: messages.join("\n"),
+        });
+      });
     return () => {
       live = false;
     };

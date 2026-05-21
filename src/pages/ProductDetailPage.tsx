@@ -19,7 +19,9 @@ import { SaveDesignModal } from "../components/design/SaveDesignModal";
 import { RelatedProducts } from "../components/product/RelatedProducts";
 import { ReviewList } from "../components/review/ReviewList";
 import { productApi } from "../services/product.api";
+import { wishlistApi } from "../services/wishlist.api";
 import { formatVnd } from "../utils/formatPrice";
+import { getErrorMessages } from "../utils/errors";
 import { useCartStore } from "../store/cartStore";
 import { useWishlistStore } from "../store/wishlistStore";
 import type { Product, ProductColor, ProductMaterial } from "../types";
@@ -56,12 +58,14 @@ export function ProductDetailPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [saveDesignOpen, setSaveDesignOpen] = useState(false);
   const [added, setAdded] = useState(false);
+  const [isWishlistSaving, setIsWishlistSaving] = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
-  const toggleWishlist = useWishlistStore((s) => s.toggle);
+  const addWishlist = useWishlistStore((s) => s.add);
   const isWished = useWishlistStore((s) =>
     product ? s.isWished(product.id) : false,
   );
+  const removeWishlist = useWishlistStore((s) => s.remove);
 
   useEffect(() => {
     if (!id) return;
@@ -79,8 +83,14 @@ export function ProductDetailPage() {
         setSelectedColor(res.data.colors[0]);
         setSelectedMaterial(res.data.materials[0]);
         setActiveImg(0);
-      } catch {
-        if (live) setProduct(null);
+      } catch (caught) {
+        if (live) {
+          const messages = getErrorMessages(caught, "Không thể tải sản phẩm.");
+          setProduct(null);
+          toast.error("Không thể tải sản phẩm", {
+            description: messages.join("\n"),
+          });
+        }
       } finally {
         if (live) setIsLoading(false);
       }
@@ -130,13 +140,42 @@ export function ProductDetailPage() {
     setSaveDesignOpen(true);
   }
 
-  function handleToggleWishlist() {
-    if (!product) return;
+  async function handleToggleWishlist() {
+    if (!product || isWishlistSaving) return;
 
-    toggleWishlist(product);
-    toast.success(isWished ? "Đã bỏ khỏi yêu thích" : "Đã thêm vào yêu thích", {
-      description: product.name,
-    });
+    const nextWished = !isWished;
+    setIsWishlistSaving(true);
+
+    if (nextWished) {
+      addWishlist(product);
+    } else {
+      removeWishlist(product.id);
+    }
+
+    try {
+      if (nextWished) {
+        await wishlistApi.add(product.id);
+      } else {
+        await wishlistApi.remove(product.id);
+      }
+
+      toast.success(nextWished ? "Đã thêm vào yêu thích" : "Đã bỏ khỏi yêu thích", {
+        description: product.name,
+      });
+    } catch (caught) {
+      if (nextWished) {
+        removeWishlist(product.id);
+      } else {
+        addWishlist(product);
+      }
+
+      const messages = getErrorMessages(caught, "Không thể cập nhật yêu thích.");
+      toast.error("Không thể cập nhật yêu thích", {
+        description: messages.join("\n"),
+      });
+    } finally {
+      setIsWishlistSaving(false);
+    }
   }
 
   /* ── Loading ── */
@@ -454,6 +493,7 @@ export function ProductDetailPage() {
               aria-label={isWished ? "Bỏ yêu thích" : "Yêu thích"}
               aria-pressed={isWished}
               className={`pdp__icon-btn ${isWished ? "pdp__icon-btn--wished" : ""}`}
+              disabled={isWishlistSaving}
               type="button"
               onClick={handleToggleWishlist}
             >

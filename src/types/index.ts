@@ -5,6 +5,9 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  displayName?: string;
+  avatarUrl?: string;
+  role?: string;
 }
 
 export interface AuthTokens {
@@ -28,11 +31,11 @@ export interface Product {
   id: string;
   name: string;
   collection: string;
-  category: "sofa" | "chair" | "table" | "shelf" | "lamp" | "other";
+  category: string;
   basePrice: number;
   colors: ProductColor[];
   materials: ProductMaterial[];
-  dimensions: { w: number; d: number; h: number };
+  dimensions: { w: number; d: number; h: number; unit?: string };
   modelUrl?: string;
   images: string[];
   arSupported: boolean;
@@ -40,6 +43,27 @@ export interface Product {
   rating: number;
   reviewCount: number;
   inStock: boolean;
+  slug?: string;
+  description?: string;
+  thumbnailUrl?: string;
+  comparePrice?: number;
+  finalPrice?: number;
+  hasArSupport?: boolean;
+  averageRating?: number;
+  totalReviews?: number;
+  variants?: ProductVariant[];
+}
+
+export interface ProductVariant {
+  id: string;
+  name: string;
+  type?: string;
+  hexColor?: string;
+  textureUrl?: string;
+  priceAddon?: number;
+  isDefault?: boolean;
+  stockQuantity?: number;
+  finalPrice?: number;
 }
 
 export interface CartItem {

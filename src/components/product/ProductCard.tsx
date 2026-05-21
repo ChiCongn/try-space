@@ -1,7 +1,11 @@
 import { motion } from "framer-motion";
 import { Heart, ShoppingBag, Scan } from "lucide-react";
+import { useState, type MouseEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { wishlistApi } from "../../services/wishlist.api";
 import { formatVnd } from "../../utils/formatPrice";
+import { getErrorMessages } from "../../utils/errors";
 import { useCartStore } from "../../store/cartStore";
 import { useWishlistStore } from "../../store/wishlistStore";
 import type { Product } from "../../types";
@@ -16,11 +20,52 @@ export function ProductCard({ product }: ProductCardProps) {
   const isInCart = useCartStore((state) =>
     state.items.some((item) => item.product.id === product.id),
   );
-  const toggleWishlist = useWishlistStore((state) => state.toggle);
+  const addWishlist = useWishlistStore((state) => state.add);
   const isWished = useWishlistStore((state) => state.isWished(product.id));
+  const removeWishlist = useWishlistStore((state) => state.remove);
+  const [isWishlistSaving, setIsWishlistSaving] = useState(false);
 
   const firstColor = product.colors[0];
   const firstMaterial = product.materials[0];
+
+  async function handleToggleWishlist(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    if (isWishlistSaving) return;
+
+    const nextWished = !isWished;
+    setIsWishlistSaving(true);
+
+    if (nextWished) {
+      addWishlist(product);
+    } else {
+      removeWishlist(product.id);
+    }
+
+    try {
+      if (nextWished) {
+        await wishlistApi.add(product.id);
+      } else {
+        await wishlistApi.remove(product.id);
+      }
+
+      toast.success(nextWished ? "Đã thêm vào yêu thích" : "Đã bỏ khỏi yêu thích", {
+        description: product.name,
+      });
+    } catch (caught) {
+      if (nextWished) {
+        removeWishlist(product.id);
+      } else {
+        addWishlist(product);
+      }
+
+      const messages = getErrorMessages(caught, "Không thể cập nhật yêu thích.");
+      toast.error("Không thể cập nhật yêu thích", {
+        description: messages.join("\n"),
+      });
+    } finally {
+      setIsWishlistSaving(false);
+    }
+  }
 
   return (
     <motion.article
@@ -39,12 +84,10 @@ export function ProductCard({ product }: ProductCardProps) {
           aria-label={isWished ? "Bỏ yêu thích" : "Yêu thích"}
           aria-pressed={isWished}
           className={`pcard__wish ${isWished ? "pcard__wish--active" : ""}`}
+          disabled={isWishlistSaving}
           type="button"
           whileTap={{ scale: 0.82 }}
-          onClick={(e) => {
-            e.preventDefault();
-            toggleWishlist(product);
-          }}
+          onClick={handleToggleWishlist}
         >
           <Heart size={15} fill={isWished ? "currentColor" : "none"} />
         </motion.button>

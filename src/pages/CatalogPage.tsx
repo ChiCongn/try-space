@@ -2,18 +2,27 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { productApi, type ProductFilters } from "../services/product.api";
 import { ProductCard } from "../components/product/ProductCard";
+import { getErrorMessages } from "../utils/errors";
 import type { Product } from "../types";
 
 const categories = [
   { label: "Tất cả", value: "all", emoji: "✦" },
   { label: "Sofa", value: "sofa", emoji: "🛋" },
-  { label: "Ghế", value: "chair", emoji: "🪑" },
-  { label: "Bàn", value: "table", emoji: "🪵" },
-  { label: "Kệ", value: "shelf", emoji: "📦" },
-  { label: "Đèn", value: "lamp", emoji: "💡" },
+  { label: "Ghế", value: "ghe", emoji: "🪑" },
+  { label: "Bàn", value: "ban", emoji: "🪵" },
+  { label: "Kệ", value: "ke", emoji: "📦" },
+  { label: "Đèn", value: "den", emoji: "💡" },
 ];
+
+const categoryAliases: Record<string, string> = {
+  chair: "ghe",
+  lamp: "den",
+  shelf: "ke",
+  table: "ban",
+};
 
 const sorts: Array<{ label: string; value: ProductFilters["sort"] }> = [
   { label: "Mới nhất", value: "newest" },
@@ -22,15 +31,29 @@ const sorts: Array<{ label: string; value: ProductFilters["sort"] }> = [
   { label: "Phổ biến nhất", value: "popular" },
 ];
 
+const CATALOG_PAGE_SIZE = 48;
+
+interface CatalogPagination {
+  hasNextPage?: boolean;
+  limit: number;
+  page: number;
+  total: number;
+  totalPages?: number;
+}
+
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [pagination, setPagination] = useState<CatalogPagination | null>(null);
   const [searchFocused, setSearchFocused] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const category = searchParams.get("category") ?? "all";
+  const rawCategory = searchParams.get("category") ?? "all";
+  const category = categoryAliases[rawCategory] ?? rawCategory;
   const query = searchParams.get("q") ?? "";
   const sort = (searchParams.get("sort") ?? "newest") as ProductFilters["sort"];
   const minPrice = searchParams.get("minPrice") ?? "";
@@ -42,13 +65,19 @@ export function CatalogPage() {
   const filters = useMemo<ProductFilters>(
     () => ({
       category,
+      limit: CATALOG_PAGE_SIZE,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
       minPrice: minPrice ? Number(minPrice) : undefined,
+      page: 1,
       query,
       sort,
     }),
     [category, maxPrice, minPrice, query, sort],
   );
+
+  const hasNextPage =
+    pagination?.hasNextPage ??
+    (pagination?.totalPages ? pagination.page < pagination.totalPages : false);
 
   useEffect(() => {
     let isMounted = true;
@@ -60,7 +89,24 @@ export function CatalogPage() {
       setIsLoading(true);
       try {
         const response = await productApi.getAll(filters);
-        if (isMounted) setProducts(response.data);
+        if (isMounted) {
+          setError("");
+          setProducts(response.data);
+          setPagination(response.pagination ?? null);
+        }
+      } catch (caught) {
+        if (isMounted) {
+          const messages = getErrorMessages(
+            caught,
+            "Không thể tải sản phẩm. Vui lòng kiểm tra backend hoặc thử lại sau.",
+          );
+          setProducts([]);
+          setPagination(null);
+          setError(messages.join("\n"));
+          toast.error("Không thể tải sản phẩm", {
+            description: messages.join("\n"),
+          });
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -73,12 +119,37 @@ export function CatalogPage() {
     };
   }, [filters]);
 
+  async function loadMoreProducts() {
+    if (isLoadingMore || !hasNextPage || !pagination) return;
+
+    setIsLoadingMore(true);
+    try {
+      const response = await productApi.getAll({
+        ...filters,
+        page: pagination.page + 1,
+      });
+      setError("");
+      setProducts((current) => [...current, ...response.data]);
+      setPagination(response.pagination ?? null);
+    } catch (caught) {
+      const messages = getErrorMessages(caught, "Không thể tải thêm sản phẩm.");
+      toast.error("Không thể tải thêm sản phẩm", {
+        description: messages.join("\n"),
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }
+
   function updateParam(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
-    if (!value || value === "all" || value === "newest") {
+    const nextValue =
+      key === "minPrice" || key === "maxPrice" ? value.replace(/\D/g, "") : value;
+
+    if (!nextValue || nextValue === "all" || nextValue === "newest") {
       next.delete(key);
     } else {
-      next.set(key, value);
+      next.set(key, nextValue);
     }
     setSearchParams(next);
   }
@@ -104,9 +175,9 @@ export function CatalogPage() {
           <input
             ref={searchRef}
             className="cv2-search__input"
-            defaultValue={query}
             placeholder="Tìm sofa, ghế, đèn..."
             type="search"
+            value={query}
             onBlur={() => setSearchFocused(false)}
             onChange={(e) => updateParam("q", e.target.value)}
             onFocus={() => setSearchFocused(true)}
@@ -261,7 +332,9 @@ export function CatalogPage() {
         <section aria-label="Danh sách sản phẩm">
           <div className="cv2-grid-meta">
             <span className="cv2-count">
-              {isLoading ? "Đang tải..." : `${products.length} sản phẩm`}
+              {isLoading
+                ? "Đang tải..."
+                : `${products.length}${pagination?.total ? ` / ${pagination.total}` : ""} sản phẩm`}
             </span>
           </div>
 
@@ -271,14 +344,36 @@ export function CatalogPage() {
                 <div className="cv2-skeleton" key={i} aria-hidden />
               ))}
             </div>
-          ) : products.length > 0 ? (
-            <div className="cv2-grid">
-              <AnimatePresence>
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </AnimatePresence>
+          ) : error ? (
+            <div className="cv2-empty">
+              <span className="cv2-empty__icon">!</span>
+              <p>{error}</p>
+              <button type="button" onClick={clearFilters}>
+                Xoá bộ lọc
+              </button>
             </div>
+          ) : products.length > 0 ? (
+            <>
+              <div className="cv2-grid">
+                <AnimatePresence>
+                  {products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </AnimatePresence>
+              </div>
+              {hasNextPage && (
+                <div className="cv2-load-more">
+                  <button
+                    className="ghost-link"
+                    disabled={isLoadingMore}
+                    type="button"
+                    onClick={loadMoreProducts}
+                  >
+                    {isLoadingMore ? "Đang tải..." : "Xem thêm"}
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="cv2-empty">
               <span className="cv2-empty__icon">◎</span>

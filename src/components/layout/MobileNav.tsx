@@ -6,7 +6,7 @@ import { useCartStore } from "../../store/cartStore";
 const navItems = [
   { to: "/catalog", icon: Box, label: "Khám phá" },
   { to: "/wishlist", icon: Heart, label: "Yêu thích" },
-  { to: "/cart", icon: ShoppingBag, label: "Giỏ hàng" },
+  { to: "/cart", icon: ShoppingBag, label: "Giỏ" },
   { to: "/account", icon: UserRound, label: "Tài khoản" },
 ] as const;
 
@@ -49,7 +49,7 @@ export function MobileNav() {
         className={({ isActive }) =>
           `bnav__ar ${isActive ? "bnav__ar--active" : ""}`
         }
-        to="/ar/p001"
+        to="/ar/ghe-eames-replica"
         aria-label="Xem AR"
       >
         <span className="bnav__ar-ring" aria-hidden />

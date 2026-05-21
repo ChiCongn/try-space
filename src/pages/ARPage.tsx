@@ -6,6 +6,7 @@ import { ARControls } from "../components/ar/ARControls";
 import {
   ModelViewer,
   type ModelViewerArStatus,
+  type ModelViewerDimensions,
   type ModelViewerHandle,
   type ModelViewerLoadStatus,
 } from "../components/ar/ModelViewer";
@@ -14,10 +15,43 @@ import { ThreeViewer } from "../components/ar/ThreeViewer";
 import { useARSupport } from "../hooks/useARSupport";
 import { productApi } from "../services/product.api";
 import { formatVnd } from "../utils/formatPrice";
+import { getErrorMessages } from "../utils/errors";
 import { useArStore } from "../store/arStore";
 import { useCartStore } from "../store/cartStore";
 import { useDesignStore } from "../store/designStore";
 import type { Product, ProductColor, ProductMaterial } from "../types";
+
+const preloadedModelUrls = new Set<string>();
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function formatScaleValue(value: number) {
+  return Number.isFinite(value) ? clamp(value, 0.02, 20).toFixed(4) : "1";
+}
+
+function preloadModelAsset(modelUrl: string) {
+  if (
+    preloadedModelUrls.has(modelUrl) ||
+    typeof document === "undefined" ||
+    !modelUrl
+  ) {
+    return;
+  }
+
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "fetch";
+  link.href = modelUrl;
+  link.type = "model/gltf-binary";
+  if (!modelUrl.startsWith("/")) {
+    link.crossOrigin = "anonymous";
+  }
+
+  document.head.appendChild(link);
+  preloadedModelUrls.add(modelUrl);
+}
 
 export function ARPage() {
   const { id } = useParams();
@@ -33,6 +67,10 @@ export function ARPage() {
   const [selectedMaterialId, setSelectedMaterialId] = useState("");
   const [modelStatus, setModelStatus] =
     useState<ModelViewerLoadStatus>("loading");
+  const [modelMeasurement, setModelMeasurement] = useState<{
+    dimensions: ModelViewerDimensions;
+    src: string;
+  } | null>(null);
   const [arStatus, setArStatus] = useState<ModelViewerArStatus | "idle">(
     "idle",
   );
@@ -54,6 +92,9 @@ export function ARPage() {
       .getById(id)
       .then((response) => {
         if (isMounted) {
+          if (response.data.modelUrl) {
+            preloadModelAsset(response.data.modelUrl);
+          }
           setProduct(response.data);
           setSelectedColorId(
             searchParams.get("color") ?? response.data.colors[0]?.id ?? "",
@@ -64,6 +105,18 @@ export function ARPage() {
               "",
           );
         }
+      })
+      .catch((caught) => {
+        if (!isMounted) return;
+
+        const messages = getErrorMessages(
+          caught,
+          "Không thể tải sản phẩm AR.",
+        );
+        setProduct(null);
+        toast.error("Không thể tải sản phẩm AR", {
+          description: messages.join("\n"),
+        });
       })
       .finally(() => {
         if (isMounted) {
@@ -106,6 +159,27 @@ export function ARPage() {
 
     return product.basePrice + selectedMaterial.surcharge;
   }, [product, selectedMaterial]);
+
+  const modelScale = useMemo(() => {
+    if (
+      !product?.modelUrl ||
+      modelMeasurement?.src !== product.modelUrl ||
+      !modelMeasurement.dimensions
+    ) {
+      return "1 1 1";
+    }
+
+    const targetWidth = product.dimensions.w / 100;
+    const targetHeight = product.dimensions.h / 100;
+    const targetDepth = product.dimensions.d / 100;
+    const { x, y, z } = modelMeasurement.dimensions;
+
+    return [
+      formatScaleValue(targetWidth / Math.max(x, 0.01)),
+      formatScaleValue(targetHeight / Math.max(y, 0.01)),
+      formatScaleValue(targetDepth / Math.max(z, 0.01)),
+    ].join(" ");
+  }, [modelMeasurement, product]);
 
   useEffect(() => {
     if (selectedColor && selectedMaterial) {
@@ -154,11 +228,15 @@ export function ARPage() {
         description: "Quét mặt sàn chậm để đặt sản phẩm.",
       });
       setArStoreStatus("active");
-    } catch {
+    } catch (caught) {
       setArStatus("failed");
       setArStoreStatus("error");
+      const messages = getErrorMessages(
+        caught,
+        "Vui lòng thử lại hoặc dùng viewer 3D.",
+      );
       toast.error("Không thể mở AR", {
-        description: "Vui lòng thử lại hoặc dùng viewer 3D.",
+        description: messages.join("\n"),
       });
     } finally {
       setIsLaunchingAR(false);
@@ -211,6 +289,19 @@ export function ARPage() {
     setSelectedMaterialId(material.id);
   }
 
+  function handleModelDimensionsChange(dimensions: ModelViewerDimensions) {
+    if (!product?.modelUrl) return;
+    setModelMeasurement({ dimensions, src: product.modelUrl });
+  }
+
+  const arButtonLabel = isLaunchingAR
+    ? "Đang mở camera..."
+    : modelStatus === "loading"
+      ? "Đang tải model 3D..."
+    : modelStatus === "error"
+      ? "Model 3D bị lỗi"
+      : "Mở camera AR";
+
   if (isLoading) {
     return (
       <div className="ar-page-state">
@@ -245,25 +336,39 @@ export function ARPage() {
         </button>
       </div>
 
-      <section className="ar-stage" aria-label="Xem sản phẩm trong 3D">
-        <div className="ar-viewfinder">
-          {product.modelUrl ? (
-            <ModelViewer
-              ref={modelViewerRef}
-              alt={`AR model của ${product.name}`}
-              onArAvailabilityChange={setCanActivateAR}
-              onArStatusChange={handleArStatusChange}
-              onLoadStatusChange={setModelStatus}
-              poster={product.images[0]}
-              selectedColor={selectedColor.hex}
-              src={product.modelUrl}
-            />
-          ) : (
-            <ThreeViewer color={selectedColor.hex} />
-          )}
-          {arStatus === "session-started" ? <PlaneDetector /> : null}
-        </div>
-      </section>
+      <div className="ar-viewfinder">
+        {product.modelUrl ? (
+          <ModelViewer
+            ref={modelViewerRef}
+            alt={`AR model của ${product.name}`}
+            onArAvailabilityChange={setCanActivateAR}
+            onArStatusChange={handleArStatusChange}
+            onLoadStatusChange={setModelStatus}
+            onModelDimensionsChange={handleModelDimensionsChange}
+            poster={product.images[0]}
+            modelScale={modelScale}
+            selectedColor={selectedColor.hex}
+            src={product.modelUrl}
+          />
+        ) : (
+          <ThreeViewer color={selectedColor.hex} />
+        )}
+        {arStatus === "session-started" ? <PlaneDetector /> : null}
+      </div>
+
+      <div className="ar-floating-actions" aria-label="Tác vụ AR chính">
+        <button
+          className="ar-floating-actions__primary"
+          disabled={
+            isLaunchingAR || !product.modelUrl || modelStatus === "error"
+          }
+          type="button"
+          onClick={handleStartAR}
+        >
+          <ScanLine size={19} />
+          {arButtonLabel}
+        </button>
+      </div>
 
       <aside className="ar-bottom-sheet" aria-label="Điều khiển AR">
         <div className="ar-panel-title">
@@ -311,17 +416,6 @@ export function ARPage() {
         />
 
         <div className="ar-actions">
-          <button
-            className="ar-actions__primary"
-            disabled={
-              isLaunchingAR || !product.modelUrl || modelStatus === "error"
-            }
-            type="button"
-            onClick={handleStartAR}
-          >
-            <ScanLine size={18} />
-            {isLaunchingAR ? "Đang mở..." : "Mở AR"}
-          </button>
           <button type="button" onClick={handleAddToCart}>
             <ShoppingBag size={18} />
             Thêm giỏ

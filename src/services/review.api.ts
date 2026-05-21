@@ -1,113 +1,91 @@
-import { apiClient, mockDelay, useMockApi } from "./api";
-import type { ApiResponse, CreateReviewPayload, RatingSummary, Review } from "../types";
+import { apiClient } from "./api";
+import type { ApiResponse, CreateReviewPayload, Review } from "../types";
 
-const mockReviews: Review[] = [
-  {
-    content: "Màu sắc lên trong viewer khá sát ảnh thật, kích thước AR dễ hình dung.",
-    createdAt: "2026-04-18T09:30:00.000Z",
-    helpfulCount: 12,
-    id: "r001",
-    productId: "p001",
-    rating: 5,
-    title: "Dễ quyết định trước khi mua",
-    userId: "u1",
-    userName: "Minh Trần",
-  },
-  {
-    content: "Model tải ổn trên điện thoại, phần chọn vật liệu nên có thêm ảnh cận.",
-    createdAt: "2026-04-22T15:20:00.000Z",
-    helpfulCount: 7,
-    id: "r002",
-    productId: "p001",
-    rating: 4,
-    title: "Trải nghiệm AR tốt",
-    userId: "u2",
-    userName: "Lan Anh",
-  },
-];
+type ApiReview = Partial<Review> & {
+  author?: { displayName?: string; email?: string; name?: string };
+  comment?: string;
+  helpful?: number;
+  product?: { id?: string };
+  user?: { displayName?: string; email?: string; name?: string };
+};
 
-function getSummary(reviews: Review[]): RatingSummary {
-  const distribution: RatingSummary["distribution"] = {
-    1: 0,
-    2: 0,
-    3: 0,
-    4: 0,
-    5: 0,
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function unwrapData(payload: unknown): unknown {
+  if (!isRecord(payload) || !("data" in payload)) return payload;
+  return payload.data;
+}
+
+function extractReviews(payload: unknown): ApiReview[] {
+  const data = unwrapData(payload);
+
+  if (Array.isArray(data)) return data as ApiReview[];
+  if (!isRecord(data)) return [];
+
+  if (Array.isArray(data.reviews)) return data.reviews as ApiReview[];
+  if (Array.isArray(data.items)) return data.items as ApiReview[];
+  if (Array.isArray(data.data)) return data.data as ApiReview[];
+
+  return [];
+}
+
+function normalizeReview(review: ApiReview, productId?: string): Review {
+  const user = review.user ?? review.author;
+
+  return {
+    content: review.content ?? review.comment ?? "",
+    createdAt: review.createdAt ?? new Date().toISOString(),
+    helpfulCount: review.helpfulCount ?? review.helpful ?? 0,
+    id:
+      review.id ??
+      `${productId ?? review.productId ?? "review"}-${review.createdAt ?? ""}`,
+    productId: review.productId ?? review.product?.id ?? productId ?? "",
+    rating: Number(review.rating ?? 0),
+    title: review.title ?? "Đánh giá sản phẩm",
+    userId: review.userId ?? "",
+    userName:
+      review.userName ??
+      user?.name ??
+      user?.displayName ??
+      user?.email ??
+      "Người dùng",
   };
-
-  reviews.forEach((review) => {
-    distribution[review.rating as 1 | 2 | 3 | 4 | 5] += 1;
-  });
-
-  const total = reviews.length;
-  const average = total
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / total
-    : 0;
-
-  return { average, distribution, total };
 }
 
 export const reviewApi = {
   async create(payload: CreateReviewPayload): Promise<ApiResponse<Review>> {
-    if (useMockApi) {
-      await mockDelay(250);
-      const review: Review = {
-        content: payload.content,
-        createdAt: new Date().toISOString(),
-        helpfulCount: 0,
-        id: `r${Date.now()}`,
-        productId: payload.productId,
-        rating: payload.rating,
-        title: payload.title,
-        userId: "mock-user",
-        userName: "Bạn",
-      };
-      mockReviews.unshift(review);
-      return { data: review };
-    }
-
-    const response = await apiClient.post<ApiResponse<Review>>("/reviews", payload);
-    return response.data;
+    const { productId, ...body } = payload;
+    const response = await apiClient.post<unknown>(
+      `/products/${productId}/reviews`,
+      body,
+    );
+    return {
+      data: normalizeReview(unwrapData(response.data) as ApiReview, productId),
+    };
   },
 
   async getByProduct(productId: string): Promise<ApiResponse<Review[]>> {
-    if (useMockApi) {
-      await mockDelay(250);
-      const data = mockReviews.filter((review) => review.productId === productId);
-      return { data, pagination: { limit: data.length, page: 1, total: data.length } };
-    }
-
-    const response = await apiClient.get<ApiResponse<Review[]>>(
+    const response = await apiClient.get<unknown>(
       `/products/${productId}/reviews`,
     );
-    return response.data;
+    const reviews = extractReviews(response.data).map((review) =>
+      normalizeReview(review, productId),
+    );
+
+    return { data: reviews };
   },
 
-  async getSummary(productId: string): Promise<ApiResponse<RatingSummary>> {
-    if (useMockApi) {
-      await mockDelay(150);
-      const reviews = mockReviews.filter((review) => review.productId === productId);
-      return { data: getSummary(reviews) };
-    }
-
-    const response = await apiClient.get<ApiResponse<RatingSummary>>(
-      `/products/${productId}/reviews/summary`,
+  async markHelpful(
+    productId: string,
+    reviewId: string,
+  ): Promise<ApiResponse<Review>> {
+    const response = await apiClient.post<unknown>(
+      `/products/${productId}/reviews/${reviewId}/helpful`,
     );
-    return response.data;
-  },
-
-  async markHelpful(reviewId: string): Promise<ApiResponse<Review>> {
-    if (useMockApi) {
-      await mockDelay(120);
-      const review = mockReviews.find((item) => item.id === reviewId);
-      if (!review) throw new Error("Review not found");
-      review.helpfulCount += 1;
-      return { data: review };
-    }
-
-    const response = await apiClient.post<ApiResponse<Review>>(
-      `/reviews/${reviewId}/helpful`,
-    );
-    return response.data;
+    return {
+      data: normalizeReview(unwrapData(response.data) as ApiReview, productId),
+    };
   },
 };

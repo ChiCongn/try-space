@@ -1,7 +1,9 @@
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { orderApi } from "../services/order.api";
+import { getErrorMessages } from "../utils/errors";
 import { formatDateTime } from "../utils/formatDate";
 import { formatVnd } from "../utils/formatPrice";
 import type { Order } from "../types";
@@ -13,9 +15,20 @@ export function OrderDetailPage() {
   useEffect(() => {
     if (!id) return;
     let live = true;
-    orderApi.getOrderDetail(id).then((response) => {
-      if (live) setOrder(response.data);
-    }).catch(() => setOrder(null));
+    orderApi
+      .getOrderDetail(id)
+      .then((response) => {
+        if (live) setOrder(response.data);
+      })
+      .catch((caught) => {
+        if (!live) return;
+
+        const messages = getErrorMessages(caught, "Không thể tải đơn hàng.");
+        setOrder(null);
+        toast.error("Không thể tải đơn hàng", {
+          description: messages.join("\n"),
+        });
+      });
     return () => {
       live = false;
     };
@@ -35,7 +48,6 @@ export function OrderDetailPage() {
       <Link className="ghost-link" to="/orders"><ArrowLeft size={16} /></Link>
       <div className="page-heading compact">
         <span>{formatDateTime(order.createdAt)}</span>
-        <h1>{order.id}</h1>
       </div>
       <div className="checkout-layout">
         <div className="order-list">
