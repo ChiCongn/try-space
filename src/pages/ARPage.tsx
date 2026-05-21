@@ -1,6 +1,6 @@
 import { ArrowLeft, ScanLine, ShoppingBag } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ARControls } from "../components/ar/ARControls";
 import {
@@ -55,12 +55,14 @@ function preloadModelAsset(modelUrl: string) {
 
 export function ARPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [searchParams] = useSearchParams();
   const arSupport = useARSupport();
   const modelViewerRef = useRef<ModelViewerHandle | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [canActivateAR, setCanActivateAR] = useState(false);
+  const [, setCanActivateAR] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState("");
   const [selectedMaterialId, setSelectedMaterialId] = useState("");
   const [modelStatus, setModelStatus] =
@@ -98,7 +100,9 @@ export function ARPage() {
             searchParams.get("color") ?? response.data.colors[0]?.id ?? "",
           );
           setSelectedMaterialId(
-            searchParams.get("material") ?? response.data.materials[0]?.id ?? "",
+            searchParams.get("material") ??
+              response.data.materials[0]?.id ??
+              "",
           );
         }
       })
@@ -299,22 +303,37 @@ export function ARPage() {
       : "Mở camera AR";
 
   if (isLoading) {
-    return <div className="ar-page">Đang mở AR...</div>;
+    return (
+      <div className="ar-page-state">
+        <span>TrySpace AR</span>
+        <strong>Đang tải không gian thử sản phẩm...</strong>
+      </div>
+    );
   }
 
   if (!product || !selectedColor || !selectedMaterial) {
-    return <div className="ar-page">Không tìm thấy sản phẩm.</div>;
+    return (
+      <div className="ar-page-state">
+        <span>TrySpace AR</span>
+        <strong>Không tìm thấy sản phẩm.</strong>
+        <Link className="primary-link" to="/catalog">
+          Về catalog
+        </Link>
+      </div>
+    );
   }
 
   return (
     <section className="ar-page">
       <div className="ar-topbar">
-        <Link to={`/products/${product.id}`} aria-label="Quay lại">
-          <ArrowLeft size={20} />
-        </Link>
-        <span>
-          {canActivateAR ? "AR ready" : "3D preview"}
-        </span>
+        <button
+          aria-label="Quay lại"
+          className="pdp__back"
+          type="button"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={18} strokeWidth={2} />
+        </button>
       </div>
 
       <div className="ar-viewfinder">
@@ -352,12 +371,17 @@ export function ARPage() {
       </div>
 
       <aside className="ar-bottom-sheet" aria-label="Điều khiển AR">
+        <div className="ar-panel-title">
+          <span>Cấu hình sản phẩm</span>
+        </div>
+
         <div className="ar-bottom-sheet__header">
           <div>
-            <span>
-              {selectedColor.name} · {selectedMaterial.name}
-            </span>
+            <span>{product.collection}</span>
             <strong>{product.name}</strong>
+            <small>
+              {selectedColor.name} · {selectedMaterial.name}
+            </small>
           </div>
           <strong className="ar-bottom-sheet__price">
             {formatVnd(finalPrice)}

@@ -833,6 +833,7 @@
 
 .model-viewer-ar-button {
   align-items: center;
+  bottom: 1rem;
   background: var(--amber-brand);
   border: 1px solid var(--amber-brand);
   border-radius: 999px;
@@ -841,8 +842,12 @@
   cursor: pointer;
   display: inline-flex;
   font-weight: 800;
+  left: 50%;
   min-height: 2.65rem;
   padding: 0 1rem;
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 3;
 }
 
 .viewer-state {
@@ -860,20 +865,47 @@
 .ar-page {
   background: var(--bg-primary);
   color: var(--ink-primary);
-  min-height: 100svh;
-  overflow: hidden;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  min-height: calc(100svh - 64px);
+  overflow: visible;
+  padding: 1rem;
   position: relative;
+}
+
+.ar-page-state {
+  align-items: center;
+  background: var(--bg-primary);
+  color: var(--ink-primary);
+  display: grid;
+  gap: 0.85rem;
+  justify-items: center;
+  min-height: calc(100svh - 64px);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.ar-page-state span {
+  color: var(--amber-brand);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ar-page-state strong {
+  font-size: 1.05rem;
 }
 
 .ar-topbar {
   align-items: center;
   display: flex;
   gap: 0.75rem;
-  left: 0;
-  padding: 1rem;
-  position: fixed;
-  right: 0;
-  top: 0;
+  left: 1rem;
+  padding: 0;
+  position: absolute;
+  top: 1rem;
   z-index: 6;
 }
 
@@ -882,10 +914,16 @@
 }
 
 .ar-topbar span {
-  background: rgba(15, 15, 15, 0.72);
+  background: color-mix(in srgb, var(--bg-primary) 78%, transparent);
   border: 1px solid var(--border);
   border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
   padding: 0.45rem 0.75rem;
+}
+
+.ar-stage {
+  min-width: 0;
 }
 
 .ar-viewfinder {
@@ -895,13 +933,13 @@
 }
 
 .ar-viewfinder .model-viewer-frame {
-  border-radius: 0;
+  border-radius: 1rem;
   height: 100%;
-  min-height: 100%;
+  min-height: 0;
 }
 
 .ar-viewfinder .model-viewer-frame model-viewer {
-  min-height: 100svh;
+  min-height: 100%;
 }
 
 .ar-viewfinder .model-viewer-ar-button {
@@ -983,10 +1021,12 @@
 }
 
 .ar-bottom-sheet {
-  background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
-  backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border);
-  bottom: 0;
+  background: color-mix(in srgb, var(--bg-primary) 96%, var(--bg-surface));
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+  align-self: start;
   display: grid;
   gap: 0.85rem;
   left: 0;
@@ -1047,9 +1087,13 @@
 
 .ar-bottom-sheet__header {
   align-items: flex-start;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
   display: flex;
   gap: 1rem;
   justify-content: space-between;
+  padding: 0.9rem;
 }
 
 .ar-bottom-sheet__header div {
@@ -1060,14 +1104,23 @@
 }
 
 .ar-bottom-sheet__header span {
-  color: var(--ink-secondary);
-  font-size: 0.78rem;
+  color: var(--amber-brand);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .ar-bottom-sheet__header strong {
   color: var(--ink-primary);
-  font-size: 1rem;
+  font-size: 1.08rem;
   line-height: 1.25;
+}
+
+.ar-bottom-sheet__header small {
+  color: var(--ink-secondary);
+  font-size: 0.78rem;
+  line-height: 1.3;
 }
 
 .ar-bottom-sheet__price {
@@ -1118,6 +1171,34 @@
   padding: 0.7rem 0.8rem;
 }
 
+.ar-product-meta {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ar-product-meta div {
+  background: color-mix(in srgb, var(--bg-surface) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.65rem;
+}
+
+.ar-product-meta span {
+  color: var(--ink-secondary);
+  font-size: 0.72rem;
+}
+
+.ar-product-meta strong {
+  color: var(--ink-primary);
+  font-size: 0.84rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .ar-support-note svg {
   color: var(--amber-brand);
   flex-shrink: 0;
@@ -1125,6 +1206,8 @@
 }
 
 .ar-actions {
+  background: color-mix(in srgb, var(--bg-primary) 96%, transparent);
+  border-top: 1px solid var(--border);
   display: grid;
   gap: 0.65rem;
   grid-template-columns: 1fr;
@@ -1133,6 +1216,7 @@
 .ar-actions button {
   cursor: pointer;
   font-weight: 700;
+  min-width: 0;
 }
 
 .ar-actions .ar-actions__primary {
@@ -1159,12 +1243,36 @@
   }
 
   .ar-bottom-sheet {
-    border: 1px solid var(--border);
-    border-radius: 1.25rem;
-    bottom: 1rem;
-    left: auto;
-    max-width: 420px;
-    right: 1rem;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .ar-page {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+    overflow: visible;
+    padding: 0.75rem 0.75rem 5rem;
+  }
+
+  .ar-viewfinder {
+    height: min(48svh, 420px);
+    min-height: 300px;
+    width: 100%;
+  }
+
+  .ar-bottom-sheet {
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    position: static;
+  }
+}
+
+@media (max-width: 520px) {
+  .ar-actions {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -4572,9 +4680,162 @@ select:focus-visible {
   gap: 0.75rem;
 }
 
+.ar-controls__section {
+  background: color-mix(in srgb, var(--bg-surface) 86%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem;
+}
+
+.ar-controls__section > span,
+.ar-controls__section-head span {
+  color: var(--ink-secondary);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ar-controls__section-head {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.ar-controls__section-head strong {
+  color: var(--ink-primary);
+  font-size: 0.86rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ar-controls__row {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ar-controls__row button,
+.ar-controls__materials button {
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  color: var(--ink-primary);
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.45rem;
+  height: auto;
+  min-height: 2.55rem;
+  padding: 0.55rem 0.65rem;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+  width: auto;
+}
+
+.ar-controls__row button {
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ar-controls__row button span {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ar-controls__swatches {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(4.8rem, 1fr));
+}
+
 .ar-controls__swatches button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: 1.35rem minmax(0, 1fr);
+  min-height: 2.55rem;
+  padding: 0.35rem 0.5rem;
+  width: auto;
+}
+
+.ar-controls__swatches button i {
   background: var(--swatch);
-  border-radius: 999px;
+  border-radius: 0.5rem;
+  display: block;
+  height: 1.35rem;
+  width: 1.35rem;
+}
+
+.ar-controls__swatches button span {
+  color: var(--ink-primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.1;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ar-controls__swatches button[aria-pressed="true"],
+.ar-controls__materials button[aria-pressed="true"] {
+  border-color: var(--amber-brand);
+  box-shadow: 0 0 0 1px var(--amber-brand);
+}
+
+.ar-controls__materials {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr;
+}
+
+.ar-controls__materials button {
+  align-items: center;
+  display: grid;
+  gap: 0.35rem 0.55rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  justify-content: flex-start;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.ar-controls__materials button span {
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ar-controls__materials button small {
+  color: var(--ink-secondary);
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+
+.ar-controls__materials button[aria-pressed="true"] small {
+  color: var(--ink-primary);
+}
+
+.ar-controls__row button:hover,
+.ar-controls__swatches button:hover,
+.ar-controls__materials button:hover {
+  border-color: color-mix(in srgb, var(--amber-brand) 55%, var(--border));
 }
 
 .three-viewer {
