@@ -15,7 +15,7 @@ const schema = z.object({
 
 export function LoginPage() {
   const { handleSubmit, register } = useForm<LoginPayload>({
-    defaultValues: { email: "acc01@gmail.com", password: "Acc01@gmail" },
+    defaultValues: { email: "an.nguyen@gmail.com", password: "Password123!" },
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
